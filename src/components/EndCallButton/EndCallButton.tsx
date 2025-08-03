@@ -1,6 +1,11 @@
 import { BiPhone } from 'react-icons/bi';
 
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export interface EndCallButtonProps {
   onClick: () => void;
@@ -8,9 +13,14 @@ export interface EndCallButtonProps {
 
 const EndCallButton = ({ onClick }: EndCallButtonProps) => {
   return (
-    <Button variant="destructive" type="button" onClick={onClick}>
-      <BiPhone />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="destructive" type="button" onClick={onClick}>
+          <BiPhone />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>End call</TooltipContent>
+    </Tooltip>
   );
 };
 

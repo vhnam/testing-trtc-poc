@@ -1,6 +1,12 @@
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 
-import DoctorVideoContainer from '@/modules/doctor-video-screen/doctor-video-container';
+const DoctorVideoContainer = dynamic(
+  () => import('@/modules/doctor-video-screen/doctor-video-container'),
+  {
+    ssr: false,
+  }
+);
 
 const DoctorPage = () => {
   return (

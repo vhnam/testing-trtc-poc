@@ -1,6 +1,11 @@
 import { BiMicrophone, BiMicrophoneOff } from 'react-icons/bi';
 
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export interface MicrophoneButtonProps {
   isMicrophoneOn: boolean;
@@ -12,9 +17,16 @@ const MicrophoneButton = ({
   onClick,
 }: MicrophoneButtonProps) => {
   return (
-    <Button type="button" onClick={onClick}>
-      {isMicrophoneOn ? <BiMicrophone /> : <BiMicrophoneOff />}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="outline" type="button" onClick={onClick}>
+          {isMicrophoneOn ? <BiMicrophone /> : <BiMicrophoneOff />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {isMicrophoneOn ? 'Turn off microphone' : 'Turn on microphone'}
+      </TooltipContent>
+    </Tooltip>
   );
 };
 

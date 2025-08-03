@@ -13,53 +13,65 @@ import { genTestUserSig } from '@/utils/generateTestUserSig';
 
 import userInfoStore from '@/stores/userInfo.store';
 
-import EndCallButton from '@/components/EndCallButton';
+// import EndCallButton from '@/components/EndCallButton';
 import MicrophoneButton from '@/components/MicrophoneButton';
 import VideoButton from '@/components/VideoButton';
 
 const PatientVideoContainer = () => {
   const [trtc, setTrtc] = useState<TRTC | null>(null);
   const router = useRouter();
-  const [isVideoOn, setIsVideoOn] = useState(false);
-  const [isMicrophoneOn, setIsMicrophoneOn] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
   const [currentRoomId, setCurrentRoomId] = useState<number | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string>('');
   const [remoteUsers, setRemoteUsers] = useState<string[]>([]);
+  const [attemptedUsers, setAttemptedUsers] = useState<Set<string>>(new Set());
 
   const {
     userInfo: { userId },
   } = useStore(userInfoStore);
 
   const handleToggleMicrophone = async () => {
-    if (!trtc) return;
-    await trtc.updateLocalAudio({ mute: !isMicrophoneOn });
-    setIsMicrophoneOn(!isMicrophoneOn);
+    try {
+      if (!trtc) return;
+      await trtc.updateLocalAudio({ mute: isMicrophoneOn });
+      setIsMicrophoneOn(!isMicrophoneOn);
+    } catch (error) {
+      console.error(`Failed to toggle microphone`, error);
+    }
   };
 
   const handleToggleVideo = async () => {
-    if (!trtc) return;
-    await trtc.updateLocalVideo({ mute: !isVideoOn });
-    setIsVideoOn(!isVideoOn);
-  };
-
-  const handleEndCall = async () => {
-    if (!trtc) return;
-
     try {
-      await trtc.exitRoom();
-      await trtc.stopLocalAudio();
-      await trtc.stopLocalVideo();
-      await trtc.stopRemoteVideo({
-        userId: remoteUsers[0],
-        streamType: 'main' as TRTCStreamType,
-      });
-
-      router.push('/');
+      if (!trtc) return;
+      await trtc.updateLocalVideo({ mute: isVideoOn });
+      setIsVideoOn(!isVideoOn);
     } catch (error) {
-      console.error('Failed to end call:', error);
+      console.error(`Failed to toggle video`, error);
     }
   };
+
+  // const handleEndCall = async () => {
+  //   if (!trtc) return;
+
+  //   try {
+  //     await trtc.exitRoom();
+  //     await trtc.stopLocalAudio();
+  //     await trtc.stopLocalVideo();
+
+  //     if (remoteUsers.length) {
+  //       await trtc.stopRemoteVideo({
+  //         userId: remoteUsers[0],
+  //         streamType: 'main' as TRTCStreamType,
+  //       });
+  //     }
+
+  //     router.push('/');
+  //   } catch (error) {
+  //     console.error('Failed to end call:', error);
+  //   }
+  // };
 
   const handleRemoteUserEnter = async (event: { userId: string }) => {
     if (!trtc) return;
@@ -88,6 +100,33 @@ const PatientVideoContainer = () => {
     }
 
     setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
+    setAttemptedUsers((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(event.userId);
+      return newSet;
+    });
+  };
+
+  const attemptStartRemoteVideo = async (userId: string, retryCount = 0) => {
+    if (!trtc || retryCount >= 10) return;
+
+    try {
+      await trtc.startRemoteVideo({
+        userId,
+        streamType: 'main' as TRTCStreamType,
+        view: REMOTE_VIDEO_VIEW,
+      });
+      console.log(`Started remote video for user: ${userId}`);
+    } catch (error) {
+      console.log(
+        `Attempt ${retryCount + 1}: Failed to start remote view for user ${userId}, retrying in 1 second...`
+      );
+
+      // Retry after 1 second
+      setTimeout(() => {
+        attemptStartRemoteVideo(userId, retryCount + 1);
+      }, 1000);
+    }
   };
 
   const joinRoom = async (roomId: number) => {
@@ -104,7 +143,7 @@ const PatientVideoContainer = () => {
       await trtc.enterRoom({
         roomId,
         sdkAppId,
-        userId: userId ?? (router.query.invitedBy as string),
+        userId,
         userSig,
       });
 
@@ -172,12 +211,10 @@ const PatientVideoContainer = () => {
     };
   }, [trtc, userId]);
 
-  // Effect to start remote video when remote users are added and DOM is ready
   useEffect(() => {
     if (!trtc || remoteUsers.length === 0) return;
 
     const startRemoteVideoForUsers = async () => {
-      // Retry mechanism to ensure DOM element exists
       let retryCount = 0;
       const maxRetries = 10;
 
@@ -200,26 +237,17 @@ const PatientVideoContainer = () => {
         return;
       }
 
-      // Start remote video for all remote users
       for (const userId of remoteUsers) {
-        try {
-          await trtc.startRemoteVideo({
-            userId,
-            streamType: 'main' as TRTCStreamType,
-            view: REMOTE_VIDEO_VIEW,
-          });
-          console.log(`Started remote video for user: ${userId}`);
-        } catch (error) {
-          console.error(
-            `Failed to start remote view for user ${userId}:`,
-            error
-          );
+        // Only attempt if we haven't tried this user yet
+        if (!attemptedUsers.has(userId)) {
+          setAttemptedUsers((prev) => new Set([...prev, userId]));
+          attemptStartRemoteVideo(userId);
         }
       }
     };
 
     startRemoteVideoForUsers();
-  }, [trtc, remoteUsers]);
+  }, [trtc, remoteUsers, attemptedUsers]);
 
   if (isJoining) {
     return (
@@ -249,26 +277,34 @@ const PatientVideoContainer = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-center w-full h-screen items-center relative">
-        {/* Local Video View */}
+    <div className="relative">
+      <div>
         <div
           id={LOCAL_VIDEO_VIEW}
-          className="w-[1280px] h-[720px] bg-white [&_video]:align-top"
+          className="w-full h-[calc(100vh-68px)] bg-grey-100 [&_video]:align-top"
         />
 
-        {/* Remote Video View - positioned as overlay */}
-        {remoteUsers.length > 0 && (
-          <div
-            id={REMOTE_VIDEO_VIEW}
-            className="absolute top-4 right-4 w-64 h-48 bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top"
-          />
-        )}
+        <div className="bg-white p-4">
+          <div className="flex justify-center gap-4">
+            <MicrophoneButton
+              isMicrophoneOn={isMicrophoneOn}
+              onClick={handleToggleMicrophone}
+            />
+            <VideoButton isVideoOn={isVideoOn} onClick={handleToggleVideo} />
+            {/* <EndCallButton onClick={handleEndCall} /> */}
+          </div>
+        </div>
       </div>
 
-      {/* Room Info Display */}
+      {remoteUsers.length > 0 && (
+        <div
+          id={REMOTE_VIDEO_VIEW}
+          className="absolute top-4 right-4 lg:top-12 lg:right-16 w-[120px] h-[160px] bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top shadow-lg"
+        />
+      )}
+
       {currentRoomId && (
-        <div className="fixed top-4 left-4 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+        <div className="top-4 left-4 bg-black bg-opacity-50 text-white p-4 rounded-lg fixed">
           <div className="text-sm">
             <div>Room ID: {currentRoomId}</div>
             <div className="text-xs text-gray-300 mt-1">
@@ -282,17 +318,6 @@ const PatientVideoContainer = () => {
           </div>
         </div>
       )}
-
-      <div className="fixed bottom-6 left-0 right-0">
-        <div className="flex justify-center gap-4">
-          <MicrophoneButton
-            isMicrophoneOn={isMicrophoneOn}
-            onClick={handleToggleMicrophone}
-          />
-          <VideoButton isVideoOn={isVideoOn} onClick={handleToggleVideo} />
-          <EndCallButton onClick={handleEndCall} />
-        </div>
-      </div>
     </div>
   );
 };

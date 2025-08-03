@@ -28,6 +28,7 @@ const DoctorVideoContainer = () => {
   const [isMicrophoneOn, setIsMicrophoneOn] = useState(false);
   const [isInCall, setIsInCall] = useState(false);
   const [remoteUsers, setRemoteUsers] = useState<string[]>([]);
+  const [attemptedUsers, setAttemptedUsers] = useState<Set<string>>(new Set());
 
   const {
     userInfo: { userId },
@@ -56,6 +57,7 @@ const DoctorVideoContainer = () => {
       setIsInCall(false);
 
       setRemoteUsers([]);
+      setAttemptedUsers(new Set());
       router.push('/');
     } catch (error) {
       console.error('Failed to end call:', error);
@@ -67,21 +69,55 @@ const DoctorVideoContainer = () => {
 
     console.log('Remote user entered:', event.userId);
     setRemoteUsers((prev) => [...prev, event.userId]);
+  };
+
+  const handleRemoteUserExit = async (event: { userId: string }) => {
+    console.log('Remote user exited:', event.userId);
+
+    // Stop remote video for the exiting user
+    if (trtc) {
+      try {
+        await trtc.stopRemoteVideo({
+          userId: event.userId,
+          streamType: 'main' as TRTCStreamType,
+        });
+        console.log(`Stopped remote video for user: ${event.userId}`);
+      } catch (error) {
+        console.error(
+          `Failed to stop remote video for user ${event.userId}:`,
+          error
+        );
+      }
+    }
+
+    setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
+    setAttemptedUsers((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(event.userId);
+      return newSet;
+    });
+  };
+
+  const attemptStartRemoteVideo = async (userId: string, retryCount = 0) => {
+    if (!trtc || retryCount >= 10) return;
 
     try {
       await trtc.startRemoteVideo({
-        userId: event.userId,
+        userId,
         streamType: 'main' as TRTCStreamType,
         view: REMOTE_VIDEO_VIEW,
       });
+      console.log(`Started remote video for user: ${userId}`);
     } catch (error) {
-      console.error('Failed to start remote view:', error);
-    }
-  };
+      console.log(
+        `Attempt ${retryCount + 1}: Failed to start remote view for user ${userId}, retrying in 1 second...`
+      );
 
-  const handleRemoteUserExit = (event: { userId: string }) => {
-    console.log('Remote user exited:', event.userId);
-    setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
+      // Retry after 1 second
+      setTimeout(() => {
+        attemptStartRemoteVideo(userId, retryCount + 1);
+      }, 1000);
+    }
   };
 
   const handleStartCall = async (data: PatientInvitationSchema) => {
@@ -124,6 +160,57 @@ const DoctorVideoContainer = () => {
   };
 
   useEffect(() => {
+    if (!trtc || !userId) return;
+
+    trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
+    trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
+
+    return () => {
+      trtc.off(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
+      trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
+      trtc.exitRoom();
+    };
+  }, [trtc, userId]);
+
+  useEffect(() => {
+    if (!trtc || remoteUsers.length === 0) return;
+
+    const startRemoteVideoForUsers = async () => {
+      let retryCount = 0;
+      const maxRetries = 10;
+
+      const waitForElement = async (): Promise<HTMLElement | null> => {
+        const element = document.getElementById(REMOTE_VIDEO_VIEW);
+        if (element) return element;
+
+        if (retryCount < maxRetries) {
+          retryCount++;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          return waitForElement();
+        }
+
+        console.error('Remote video view element not found after retries');
+        return null;
+      };
+
+      const remoteVideoElement = await waitForElement();
+      if (!remoteVideoElement) {
+        return;
+      }
+
+      for (const userId of remoteUsers) {
+        // Only attempt if we haven't tried this user yet
+        if (!attemptedUsers.has(userId)) {
+          setAttemptedUsers((prev) => new Set([...prev, userId]));
+          attemptStartRemoteVideo(userId);
+        }
+      }
+    };
+
+    startRemoteVideoForUsers();
+  }, [trtc, remoteUsers, attemptedUsers]);
+
+  useEffect(() => {
     const loadTRTC = async () => {
       try {
         const TRTC = (await import('trtc-sdk-v5')).default;
@@ -140,19 +227,18 @@ const DoctorVideoContainer = () => {
   return (
     <div>
       <div className="flex justify-center w-full h-screen items-center relative">
-        {/* Local Video View */}
-        <div
-          id={LOCAL_VIDEO_VIEW}
-          className="w-[1280px] h-[720px] bg-white [&_video]:align-top"
-        />
-
-        {/* Remote Video View - positioned as overlay */}
-        {remoteUsers.length > 0 && (
+        <div className="w-[592px] h-[698px] relative">
           <div
-            id={REMOTE_VIDEO_VIEW}
-            className="absolute top-4 right-4 w-64 h-48 bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top"
+            id={LOCAL_VIDEO_VIEW}
+            className="absolute left-6 bottom-2 w-[100px] h-[128px] bg-white [&_video]:align-top shadow-lg rounded-lg overflow-hidden"
           />
-        )}
+          {remoteUsers.length > 0 && (
+            <div
+              id={REMOTE_VIDEO_VIEW}
+              className="w-[592px] h-[698px] bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top"
+            />
+          )}
+        </div>
       </div>
 
       <div className="fixed bottom-6 left-0 right-0">
