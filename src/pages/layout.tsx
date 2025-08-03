@@ -1,9 +1,9 @@
-import { Geist } from "next/font/google";
-import { PropsWithChildren } from "react";
+import { Geist } from 'next/font/google';
+import { PropsWithChildren } from 'react';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const Layout = ({ children }: PropsWithChildren) => {

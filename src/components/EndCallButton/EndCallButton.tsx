@@ -1,5 +1,6 @@
-import { BiPhone } from "react-icons/bi";
-import { Button } from "@/components/ui/button";
+import { BiPhone } from 'react-icons/bi';
+
+import { Button } from '@/components/ui/button';
 
 export interface EndCallButtonProps {
   onClick: () => void;

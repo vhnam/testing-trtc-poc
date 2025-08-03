@@ -1,1 +1,1 @@
-export { default } from "./PatientVideoContainer";
+export { default } from './PatientVideoContainer';

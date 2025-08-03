@@ -1,1 +1,1 @@
-export { default } from "./DoctorInvitationDialogContainer";
+export { default } from './DoctorInvitationDialogContainer';

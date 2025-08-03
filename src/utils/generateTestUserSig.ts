@@ -1,4 +1,4 @@
-import LibGenerateTestUserSig from "@/libs/lib-generate-test-usersig-es.min.js";
+import LibGenerateTestUserSig from '@/libs/lib-generate-test-usersig-es.min.js';
 
 /**
  * Refer to the READEME.md for the SDKAppID、SecretKey

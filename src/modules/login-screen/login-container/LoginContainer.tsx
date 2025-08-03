@@ -1,8 +1,11 @@
-import LoginForm from "@/modules/login-screen/login-form";
-import { LoginSchema } from "@/schemas/Login.schema";
-import userInfoStore from "@/stores/userInfo.store";
-import { useRouter } from "next/router";
-import { useStore } from "zustand";
+import { useRouter } from 'next/router';
+import { useStore } from 'zustand';
+
+import { LoginSchema } from '@/schemas/Login.schema';
+
+import userInfoStore from '@/stores/userInfo.store';
+
+import LoginForm from '@/modules/login-screen/login-form';
 
 const LoginContainer = () => {
   const router = useRouter();
@@ -11,7 +14,7 @@ const LoginContainer = () => {
 
   const handleLogin = (data: LoginSchema) => {
     setUserInfo(data);
-    router.push(data.role === "doctor" ? "/doctor" : "/patient");
+    router.push(data.role === 'doctor' ? '/doctor' : '/patient');
   };
 
   return (

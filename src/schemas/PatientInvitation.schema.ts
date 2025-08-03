@@ -1,7 +1,7 @@
-import * as yup from "yup";
+import * as yup from 'yup';
 
 const schema = yup.object().shape({
-  patientId: yup.string().required("Patient ID is required"),
+  patientId: yup.string().required('Patient ID is required'),
 });
 
 export type PatientInvitationSchema = yup.InferType<typeof schema>;

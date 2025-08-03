@@ -1,4 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import patientInvitationSchema, {
+  PatientInvitationSchema,
+} from '@/schemas/PatientInvitation.schema';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,15 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import patientInvitationSchema, {
-  PatientInvitationSchema,
-} from "@/schemas/PatientInvitation.schema";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export interface DoctorInvitationDialogContainerProps {
   onAction: (data: PatientInvitationSchema) => void;
@@ -33,12 +35,12 @@ const DoctorInvitationDialogContainer = ({
     formState: { errors },
   } = useForm<PatientInvitationSchema>({
     defaultValues: {
-      patientId: "",
+      patientId: '',
     },
     resolver: yupResolver(patientInvitationSchema),
   });
 
-  const patientId = watch("patientId");
+  const patientId = watch('patientId');
 
   const handleFormSubmit = (data: PatientInvitationSchema) => {
     onAction(data);
@@ -63,10 +65,10 @@ const DoctorInvitationDialogContainer = ({
             <div className="grid gap-2">
               <Label htmlFor="patientId">Patient ID</Label>
               <Input
-                {...register("patientId")}
+                {...register('patientId')}
                 id="patientId"
                 placeholder="Enter patient ID"
-                className={errors.patientId ? "border-red-500" : ""}
+                className={errors.patientId ? 'border-red-500' : ''}
               />
               {errors.patientId && (
                 <p className="text-sm text-red-500">

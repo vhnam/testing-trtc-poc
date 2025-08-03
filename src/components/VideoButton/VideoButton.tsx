@@ -1,5 +1,6 @@
-import { BiVideo, BiVideoOff } from "react-icons/bi";
-import { Button } from "@/components/ui/button";
+import { BiVideo, BiVideoOff } from 'react-icons/bi';
+
+import { Button } from '@/components/ui/button';
 
 export interface VideoButtonProps {
   isVideoOn: boolean;

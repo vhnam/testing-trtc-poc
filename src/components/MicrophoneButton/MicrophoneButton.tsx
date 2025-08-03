@@ -1,5 +1,6 @@
-import { BiMicrophone, BiMicrophoneOff } from "react-icons/bi";
-import { Button } from "@/components/ui/button";
+import { BiMicrophone, BiMicrophoneOff } from 'react-icons/bi';
+
+import { Button } from '@/components/ui/button';
 
 export interface MicrophoneButtonProps {
   isMicrophoneOn: boolean;

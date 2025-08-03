@@ -1,19 +1,25 @@
-import EndCallButton from "@/components/EndCallButton";
-import MicrophoneButton from "@/components/MicrophoneButton";
-import VideoButton from "@/components/VideoButton";
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import TRTC, { type TRTCStreamType } from 'trtc-sdk-v5';
+import { useStore } from 'zustand';
+
 import {
   DEFAULT_ROOM_ID,
   LOCAL_VIDEO_VIEW,
   REMOTE_VIDEO_VIEW,
-} from "@/constants/room";
-import userInfoStore from "@/stores/userInfo.store";
-import { genTestUserSig } from "@/utils/generateTestUserSig";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import TRTC, { type TRTCStreamType } from "trtc-sdk-v5";
-import { useStore } from "zustand";
-import DoctorInvitationDialogContainer from "@/modules/doctor-video-screen/doctor-invitation-dialog-container";
-import { type PatientInvitationSchema } from "@/schemas/PatientInvitation.schema";
+} from '@/constants/room';
+
+import { genTestUserSig } from '@/utils/generateTestUserSig';
+
+import { type PatientInvitationSchema } from '@/schemas/PatientInvitation.schema';
+
+import userInfoStore from '@/stores/userInfo.store';
+
+import EndCallButton from '@/components/EndCallButton';
+import MicrophoneButton from '@/components/MicrophoneButton';
+import VideoButton from '@/components/VideoButton';
+
+import DoctorInvitationDialogContainer from '@/modules/doctor-video-screen/doctor-invitation-dialog-container';
 
 const DoctorVideoContainer = () => {
   const [trtc, setTrtc] = useState<TRTC | null>(null);
@@ -50,31 +56,31 @@ const DoctorVideoContainer = () => {
       setIsInCall(false);
 
       setRemoteUsers([]);
-      router.push("/");
+      router.push('/');
     } catch (error) {
-      console.error("Failed to end call:", error);
+      console.error('Failed to end call:', error);
     }
   };
 
   const handleRemoteUserEnter = async (event: { userId: string }) => {
     if (!trtc) return;
 
-    console.log("Remote user entered:", event.userId);
+    console.log('Remote user entered:', event.userId);
     setRemoteUsers((prev) => [...prev, event.userId]);
 
     try {
       await trtc.startRemoteVideo({
         userId: event.userId,
-        streamType: "main" as TRTCStreamType,
+        streamType: 'main' as TRTCStreamType,
         view: REMOTE_VIDEO_VIEW,
       });
     } catch (error) {
-      console.error("Failed to start remote view:", error);
+      console.error('Failed to start remote view:', error);
     }
   };
 
   const handleRemoteUserExit = (event: { userId: string }) => {
-    console.log("Remote user exited:", event.userId);
+    console.log('Remote user exited:', event.userId);
     setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
   };
 
@@ -103,28 +109,28 @@ const DoctorVideoContainer = () => {
           await trtc.startLocalVideo({
             view: LOCAL_VIDEO_VIEW,
             option: {
-              fillMode: "cover",
-              profile: "720p",
+              fillMode: 'cover',
+              profile: '720p',
             },
           });
           await trtc.startLocalAudio();
         } catch (error) {
-          console.error("Failed to start local video/audio:", error);
+          console.error('Failed to start local video/audio:', error);
         }
       }, 100);
     } catch (error) {
-      console.error("Failed to start call:", error);
+      console.error('Failed to start call:', error);
     }
   };
 
   useEffect(() => {
     const loadTRTC = async () => {
       try {
-        const TRTC = (await import("trtc-sdk-v5")).default;
+        const TRTC = (await import('trtc-sdk-v5')).default;
         const trtcInstance = TRTC.create();
         setTrtc(trtcInstance);
       } catch (error) {
-        console.error("Failed to load TRTC SDK:", error);
+        console.error('Failed to load TRTC SDK:', error);
       }
     };
 

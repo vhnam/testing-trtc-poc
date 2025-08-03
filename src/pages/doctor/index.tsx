@@ -1,5 +1,6 @@
-import DoctorVideoContainer from "@/modules/doctor-video-screen/doctor-video-container";
-import Head from "next/head";
+import Head from 'next/head';
+
+import DoctorVideoContainer from '@/modules/doctor-video-screen/doctor-video-container';
 
 const DoctorPage = () => {
   return (
