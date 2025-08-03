@@ -4,6 +4,7 @@ import { PropsWithChildren } from 'react';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '700'],
 });
 
 const Layout = ({ children }: PropsWithChildren) => {

@@ -14,7 +14,7 @@ const PatientPage = () => {
       <Head>
         <title>Patient</title>
       </Head>
-      <PatientVideoContainer />;
+      <PatientVideoContainer />
     </>
   );
 };

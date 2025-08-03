@@ -13,7 +13,6 @@ import { genTestUserSig } from '@/utils/generateTestUserSig';
 
 import userInfoStore from '@/stores/userInfo.store';
 
-// import EndCallButton from '@/components/EndCallButton';
 import MicrophoneButton from '@/components/MicrophoneButton';
 import VideoButton from '@/components/VideoButton';
 
@@ -26,7 +25,6 @@ const PatientVideoContainer = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string>('');
   const [remoteUsers, setRemoteUsers] = useState<string[]>([]);
-  const [attemptedUsers, setAttemptedUsers] = useState<Set<string>>(new Set());
 
   const {
     userInfo: { userId },
@@ -52,26 +50,26 @@ const PatientVideoContainer = () => {
     }
   };
 
-  // const handleEndCall = async () => {
-  //   if (!trtc) return;
+  const handleEndCall = async () => {
+    if (!trtc) return;
 
-  //   try {
-  //     await trtc.exitRoom();
-  //     await trtc.stopLocalAudio();
-  //     await trtc.stopLocalVideo();
+    try {
+      await trtc.exitRoom();
+      await trtc.stopLocalAudio();
+      await trtc.stopLocalVideo();
 
-  //     if (remoteUsers.length) {
-  //       await trtc.stopRemoteVideo({
-  //         userId: remoteUsers[0],
-  //         streamType: 'main' as TRTCStreamType,
-  //       });
-  //     }
+      if (remoteUsers.length) {
+        await trtc.stopRemoteVideo({
+          userId: remoteUsers[0],
+          streamType: 'main' as TRTCStreamType,
+        });
+      }
 
-  //     router.push('/');
-  //   } catch (error) {
-  //     console.error('Failed to end call:', error);
-  //   }
-  // };
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to end call:', error);
+    }
+  };
 
   const handleRemoteUserEnter = async (event: { userId: string }) => {
     if (!trtc) return;
@@ -96,37 +94,12 @@ const PatientVideoContainer = () => {
           `Failed to stop remote video for user ${event.userId}:`,
           error
         );
+      } finally {
+        await handleEndCall();
       }
     }
 
     setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
-    setAttemptedUsers((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(event.userId);
-      return newSet;
-    });
-  };
-
-  const attemptStartRemoteVideo = async (userId: string, retryCount = 0) => {
-    if (!trtc || retryCount >= 10) return;
-
-    try {
-      await trtc.startRemoteVideo({
-        userId,
-        streamType: 'main' as TRTCStreamType,
-        view: REMOTE_VIDEO_VIEW,
-      });
-      console.log(`Started remote video for user: ${userId}`);
-    } catch (error) {
-      console.log(
-        `Attempt ${retryCount + 1}: Failed to start remote view for user ${userId}, retrying in 1 second...`
-      );
-
-      // Retry after 1 second
-      setTimeout(() => {
-        attemptStartRemoteVideo(userId, retryCount + 1);
-      }, 1000);
-    }
   };
 
   const joinRoom = async (roomId: number) => {
@@ -175,6 +148,24 @@ const PatientVideoContainer = () => {
     }
   };
 
+  const handleRemoteVideoAvailable = (event: {
+    userId: string;
+    streamType: TRTCStreamType;
+  }) => {
+    try {
+      if (!trtc || !event.userId) return;
+      const userId = event.userId;
+      const streamType = event.streamType;
+      trtc.startRemoteVideo({
+        userId,
+        streamType,
+        view: REMOTE_VIDEO_VIEW,
+      });
+    } catch (error) {
+      console.error('Failed to start video:', error);
+    }
+  };
+
   useEffect(() => {
     const loadTRTC = async () => {
       try {
@@ -192,9 +183,9 @@ const PatientVideoContainer = () => {
   useEffect(() => {
     if (!trtc || !userId) return;
 
-    // Set up TRTC event listeners
     trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
     trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
+    trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
 
     // if (roomId) {
     //   // Join the specific room from invitation
@@ -207,47 +198,10 @@ const PatientVideoContainer = () => {
     return () => {
       trtc.off(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
       trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
+      trtc.off(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
       trtc.exitRoom();
     };
   }, [trtc, userId]);
-
-  useEffect(() => {
-    if (!trtc || remoteUsers.length === 0) return;
-
-    const startRemoteVideoForUsers = async () => {
-      let retryCount = 0;
-      const maxRetries = 10;
-
-      const waitForElement = async (): Promise<HTMLElement | null> => {
-        const element = document.getElementById(REMOTE_VIDEO_VIEW);
-        if (element) return element;
-
-        if (retryCount < maxRetries) {
-          retryCount++;
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          return waitForElement();
-        }
-
-        console.error('Remote video view element not found after retries');
-        return null;
-      };
-
-      const remoteVideoElement = await waitForElement();
-      if (!remoteVideoElement) {
-        return;
-      }
-
-      for (const userId of remoteUsers) {
-        // Only attempt if we haven't tried this user yet
-        if (!attemptedUsers.has(userId)) {
-          setAttemptedUsers((prev) => new Set([...prev, userId]));
-          attemptStartRemoteVideo(userId);
-        }
-      }
-    };
-
-    startRemoteVideoForUsers();
-  }, [trtc, remoteUsers, attemptedUsers]);
 
   if (isJoining) {
     return (
@@ -279,10 +233,20 @@ const PatientVideoContainer = () => {
   return (
     <div className="relative">
       <div>
-        <div
-          id={LOCAL_VIDEO_VIEW}
-          className="w-full h-[calc(100vh-68px)] bg-grey-100 [&_video]:align-top"
-        />
+        <div className="w-full h-[calc(100svh-68px)] flex items-center justify-center bg-gray-200 relative">
+          {remoteUsers.length === 0 && (
+            <div className="absolute">
+              <p className="text-gray-800 text-2xl font-semibold">
+                The doctor will join shorty
+              </p>
+            </div>
+          )}
+
+          <div
+            id={REMOTE_VIDEO_VIEW}
+            className="w-full h-full [&_video]:align-top"
+          />
+        </div>
 
         <div className="bg-white p-4">
           <div className="flex justify-center gap-4">
@@ -291,17 +255,14 @@ const PatientVideoContainer = () => {
               onClick={handleToggleMicrophone}
             />
             <VideoButton isVideoOn={isVideoOn} onClick={handleToggleVideo} />
-            {/* <EndCallButton onClick={handleEndCall} /> */}
           </div>
         </div>
       </div>
 
-      {remoteUsers.length > 0 && (
-        <div
-          id={REMOTE_VIDEO_VIEW}
-          className="absolute top-4 right-4 lg:top-12 lg:right-16 w-[120px] h-[160px] bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top shadow-lg"
-        />
-      )}
+      <div
+        id={LOCAL_VIDEO_VIEW}
+        className="absolute top-4 right-4 lg:top-12 lg:right-16 w-[120px] h-[160px] bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top shadow-lg"
+      />
 
       {currentRoomId && (
         <div className="top-4 left-4 bg-black bg-opacity-50 text-white p-4 rounded-lg fixed">
