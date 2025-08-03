@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import TRTC, { type TRTCStreamType } from 'trtc-sdk-v5';
+import { useCallback, useEffect, useState } from 'react';
+import TRTC, { type NetworkQuality, type TRTCStreamType } from 'trtc-sdk-v5';
 import { useStore } from 'zustand';
 
 import {
@@ -15,19 +15,23 @@ import { type PatientInvitationSchema } from '@/schemas/PatientInvitation.schema
 
 import userInfoStore from '@/stores/userInfo.store';
 
+import ConfigButton from '@/components/ConfigButton';
 import EndCallButton from '@/components/EndCallButton';
 import MicrophoneButton from '@/components/MicrophoneButton';
+import NetworkStatus from '@/components/NetworkStatus/NetworkStatus';
 import TakeScreenshotButton from '@/components/TakeScreenshotButton';
 import VideoButton from '@/components/VideoButton';
 
 import DoctorInvitationDialogContainer from '@/modules/doctor-video-screen/doctor-invitation-dialog-container';
 
+const trtc = TRTC.create();
+
 const DoctorVideoContainer = () => {
-  const [trtc, setTrtc] = useState<TRTC | null>(null);
   const router = useRouter();
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
   const [isInCall, setIsInCall] = useState(false);
+  const [networkQuality, setNetworkQuality] = useState<NetworkQuality>();
 
   const {
     userInfo: { userId },
@@ -60,31 +64,37 @@ const DoctorVideoContainer = () => {
     }
   };
 
-  const handleRemoteUserEnter = async (event: { userId: string }) => {
-    if (!trtc) return;
+  const handleRemoteUserEnter = useCallback(
+    async (event: { userId: string }) => {
+      if (!trtc) return;
 
-    console.log('Remote user entered:', event.userId);
-  };
+      console.log('Remote user entered:', event.userId);
+    },
+    [trtc]
+  );
 
-  const handleRemoteUserExit = async (event: { userId: string }) => {
-    console.log('Remote user exited:', event.userId);
+  const handleRemoteUserExit = useCallback(
+    async (event: { userId: string }) => {
+      console.log('Remote user exited:', event.userId);
 
-    // Stop remote video for the exiting user
-    if (trtc) {
-      try {
-        await trtc.stopRemoteVideo({
-          userId: event.userId,
-          streamType: 'main' as TRTCStreamType,
-        });
-        console.log(`Stopped remote video for user: ${event.userId}`);
-      } catch (error) {
-        console.error(
-          `Failed to stop remote video for user ${event.userId}:`,
-          error
-        );
+      // Stop remote video for the exiting user
+      if (trtc) {
+        try {
+          await trtc.stopRemoteVideo({
+            userId: event.userId,
+            streamType: 'main' as TRTCStreamType,
+          });
+          console.log(`Stopped remote video for user: ${event.userId}`);
+        } catch (error) {
+          console.error(
+            `Failed to stop remote video for user ${event.userId}:`,
+            error
+          );
+        }
       }
-    }
-  };
+    },
+    [trtc]
+  );
 
   const handleStartCall = async (data: PatientInvitationSchema) => {
     try {
@@ -125,67 +135,77 @@ const DoctorVideoContainer = () => {
     }
   };
 
-  const handleRemoteVideoAvailable = (event: {
-    userId: string;
-    streamType: TRTCStreamType;
-  }) => {
-    try {
-      if (!trtc || !event.userId) return;
-      const userId = event.userId;
-      const streamType = event.streamType;
-      trtc.startRemoteVideo({
-        userId,
-        streamType,
-        view: REMOTE_VIDEO_VIEW,
-      });
-    } catch (error) {
-      console.error('Failed to start video:', error);
-    }
+  const handleRemoteVideoAvailable = useCallback(
+    (event: { userId: string; streamType: TRTCStreamType }) => {
+      try {
+        if (!trtc || !event.userId) return;
+        const userId = event.userId;
+        const streamType = event.streamType;
+        trtc.startRemoteVideo({
+          userId,
+          streamType,
+          view: REMOTE_VIDEO_VIEW,
+        });
+      } catch (error) {
+        console.error('Failed to start video:', error);
+      }
+    },
+    [trtc]
+  );
+
+  const handleNetworkQuality = (event: NetworkQuality) => {
+    setNetworkQuality(event);
   };
 
   useEffect(() => {
     if (!trtc || !userId) return;
 
+    trtc.on(TRTC.EVENT.NETWORK_QUALITY, handleNetworkQuality);
     trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
     trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
     trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
 
     return () => {
+      trtc.off(TRTC.EVENT.NETWORK_QUALITY, handleNetworkQuality);
       trtc.off(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
       trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
       trtc.off(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
       trtc.exitRoom();
     };
-  }, [trtc, userId]);
-
-  useEffect(() => {
-    const loadTRTC = async () => {
-      try {
-        const TRTC = (await import('trtc-sdk-v5')).default;
-        const trtcInstance = TRTC.create();
-        setTrtc(trtcInstance);
-      } catch (error) {
-        console.error('Failed to load TRTC SDK:', error);
-      }
-    };
-
-    loadTRTC();
-  }, []);
+  }, [
+    handleRemoteUserEnter,
+    handleRemoteUserExit,
+    handleRemoteVideoAvailable,
+    trtc,
+    userId,
+  ]);
 
   return (
     <div>
       <div className="flex justify-center w-full h-[calc(100vh-68px)] items-center relative">
         {isInCall && (
-          <div className="relative">
-            <div
-              id={LOCAL_VIDEO_VIEW}
-              className="absolute left-6 bottom-2 w-[100px] h-[128px] bg-white [&_video]:align-top shadow-lg rounded-lg overflow-hidden"
-            />
-            <div className="w-[500px] h-[640px] bg-gray-200 rounded-lg overflow-hidden">
+          <div className="w-[500px] h-[640px]">
+            <div className="w-full h-[calc(100%-38px)] relative">
               <div
-                id={REMOTE_VIDEO_VIEW}
-                className="w-full h-full [&_video]:align-top"
+                id={LOCAL_VIDEO_VIEW}
+                className="absolute left-6 bottom-4 w-[100px] h-[128px] bg-white [&_video]:align-top shadow-lg rounded-lg overflow-hidden"
               />
+              <div className="w-full h-full bg-gray-200 rounded-lg overflow-hidden">
+                <div
+                  id={REMOTE_VIDEO_VIEW}
+                  className="w-full h-full [&_video]:align-top"
+                />
+              </div>
+            </div>
+            <div className="bg-white grid grid-cols-2">
+              <div className="flex justify-between items-center p-2">
+                <p className="text-sm">Your network quality</p>
+                <NetworkStatus value={networkQuality?.uplinkNetworkQuality} />
+              </div>
+              <div className="flex justify-between items-center p-2">
+                <p className="text-sm">Patient network quality</p>
+                <NetworkStatus value={networkQuality?.downlinkNetworkQuality} />
+              </div>
             </div>
           </div>
         )}
@@ -195,7 +215,7 @@ const DoctorVideoContainer = () => {
         <div className="flex justify-center">
           {isInCall ? (
             <div className="flex items-center justify-between w-[500px]">
-              <div>Config</div>
+              <ConfigButton onClick={() => {}} />
               <div className="flex gap-4">
                 <MicrophoneButton
                   isMicrophoneOn={isMicrophoneOn}
