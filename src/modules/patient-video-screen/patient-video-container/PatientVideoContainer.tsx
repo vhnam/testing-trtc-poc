@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef } from 'react';
 import { useStore } from 'zustand';
+import { toast } from 'sonner';
 
 import { useMediaControls, useRemoteUsers, useTRTCRoom } from '@/hooks';
 
@@ -40,6 +41,19 @@ const PatientVideoContainer = () => {
     router.push('/');
   }, [exitRoom, router]);
 
+  // Handle doctor end call - show toast and then end call
+  const handleDoctorEndCall = useCallback(async () => {
+    toast.info('The doctor has ended the call', {
+      description: 'You will be redirected to the home page.',
+      duration: 3000,
+    });
+    
+    // Wait a bit for the toast to be visible, then end the call
+    setTimeout(async () => {
+      await handleEndCall();
+    }, 2000);
+  }, [handleEndCall]);
+
   // Setup remote user event listeners - only run once
   useEffect(() => {
     if (!userId || hasSetupEventListenersRef.current) return;
@@ -48,13 +62,13 @@ const PatientVideoContainer = () => {
     console.log(
       'Setting up remote user event listeners in PatientVideoContainer...'
     );
-    setupEventListeners(handleEndCall);
+    setupEventListeners(handleEndCall, handleDoctorEndCall);
 
     return () => {
       hasSetupEventListenersRef.current = false;
       cleanupEventListeners();
     };
-  }, [userId, setupEventListeners, cleanupEventListeners, handleEndCall]);
+  }, [userId, setupEventListeners, cleanupEventListeners, handleEndCall, handleDoctorEndCall]);
 
   // Check for existing remote users when room is joined
   useEffect(() => {

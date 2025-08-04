@@ -18,7 +18,7 @@ interface UseRemoteUsersReturn {
     userId: string;
     streamType: TRTCStreamType;
   }) => void;
-  setupEventListeners: (onRemoteUserExit?: () => void) => void;
+  setupEventListeners: (onRemoteUserExit?: () => void, onDoctorEndCall?: () => void) => void;
   cleanupEventListeners: () => void;
   checkExistingRemoteUsers: () => void;
 }
@@ -30,6 +30,7 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
   const maxRetries = 10;
   const startingRemoteVideoRef = useRef<Set<string>>(new Set()); // Track which users are having video started
   const hasSetupEventListenersRef = useRef(false); // Prevent multiple event listener setups
+  const remoteUserExitListenerRef = useRef<((event: { userId: string }) => Promise<void>) | null>(null); // Store reference to the event listener
 
   // Note: userId is available from the store but not used in this hook
   // Keeping the import for potential future use
@@ -182,7 +183,7 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
   }, []);
 
   const setupEventListeners = useCallback(
-    (onRemoteUserExit?: () => void) => {
+    (onRemoteUserExit?: () => void, onDoctorEndCall?: () => void) => {
       if (hasSetupEventListenersRef.current) {
         console.log('Event listeners already setup, skipping...');
         return;
@@ -194,19 +195,30 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
       // Listen for remote user enter
       trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
 
-      // Listen for remote user exit
-      trtc.on(
-        TRTC.EVENT.REMOTE_USER_EXIT,
-        async (event: { userId: string }) => {
-          await handleRemoteUserExit(event);
-          // Call the callback if provided (for patient to end call when doctor leaves)
-          if (onRemoteUserExit) {
-            setTimeout(() => {
-              onRemoteUserExit();
-            }, 100);
-          }
+      // Create the remote user exit listener function and store its reference
+      const remoteUserExitListener = async (event: { userId: string }) => {
+        await handleRemoteUserExit(event);
+        
+        // Call the doctor end call callback if provided (for patient to show toast when doctor leaves)
+        if (onDoctorEndCall) {
+          setTimeout(() => {
+            onDoctorEndCall();
+          }, 100);
         }
-      );
+        
+        // Call the general remote user exit callback if provided (for patient to end call when doctor leaves)
+        if (onRemoteUserExit) {
+          setTimeout(() => {
+            onRemoteUserExit();
+          }, 100);
+        }
+      };
+
+      // Store the reference for cleanup
+      remoteUserExitListenerRef.current = remoteUserExitListener;
+
+      // Listen for remote user exit
+      trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, remoteUserExitListener);
 
       // Listen for remote video available
       trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
@@ -234,10 +246,16 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
     console.log('Cleaning up remote user event listeners...');
 
     trtc.off(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
-    trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, handleRemoteUserExit);
+    
+    // Use the stored reference to remove the event listener
+    if (remoteUserExitListenerRef.current) {
+      trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, remoteUserExitListenerRef.current);
+      remoteUserExitListenerRef.current = null;
+    }
+    
     trtc.off(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
     trtc.off(TRTC.EVENT.REMOTE_AUDIO_AVAILABLE, () => {});
-  }, [handleRemoteUserEnter, handleRemoteUserExit, handleRemoteVideoAvailable]);
+  }, [handleRemoteUserEnter, handleRemoteVideoAvailable]);
 
   return {
     remoteUsers,

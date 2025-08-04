@@ -1,5 +1,6 @@
 import { Camera } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { REMOTE_VIDEO_VIEW } from '@/constants/room';
 
@@ -19,9 +20,16 @@ const TakeScreenshotButton = () => {
     setIsCapturing(true);
     try {
       await downloadScreenshot(REMOTE_VIDEO_VIEW);
+      toast.success('Screenshot captured successfully!', {
+        description: 'The image has been downloaded to your device.',
+        duration: 3000,
+      });
     } catch (error) {
       console.error('Failed to take screenshot:', error);
-      // You could add a toast notification here for better UX
+      toast.error('Failed to take screenshot', {
+        description: 'Please try again or check if the video is available.',
+        duration: 4000,
+      });
     } finally {
       setIsCapturing(false);
     }

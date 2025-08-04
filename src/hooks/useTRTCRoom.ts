@@ -7,7 +7,6 @@ import {
   REMOTE_VIDEO_VIEW,
 } from '@/constants/room';
 
-import { genTestUserSig } from '@/utils/generateTestUserSig';
 import { getTRTCInstance } from '@/utils/trtc';
 
 import userInfoStore from '@/stores/userInfo.store';
@@ -80,6 +79,93 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
     });
   }, [checkVideoContainers]);
 
+  // Helper function to exit existing room
+  const exitExistingRoom = useCallback(async () => {
+    try {
+      console.log('Exiting existing room...');
+      await trtc.exitRoom();
+      console.log('Successfully exited existing room');
+    } catch (error) {
+      // Ignore errors when exiting room that doesn't exist
+      console.log('No existing room to exit or error during exit:', error);
+    }
+  }, []);
+
+  // Helper function to generate user signature
+  const generateUserSignature = useCallback(async (userId: string) => {
+    const response = await fetch('/api/generate-user-sig', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate user signature');
+    }
+
+    return await response.json();
+  }, []);
+
+  // Helper function to enter TRTC room
+  const enterTRTCRoom = useCallback(async (roomId: number, userId: string, sdkAppId: number, userSig: string) => {
+    console.log('Entering room with sdkAppId:', sdkAppId);
+    await trtc.enterRoom({
+      roomId,
+      sdkAppId,
+      userId,
+      userSig,
+    });
+    console.log('Successfully entered room');
+  }, []);
+
+
+
+  // Helper function to start local video
+  const startLocalVideo = useCallback(async () => {
+    if (isVideoStarted) return;
+
+    try {
+      await trtc.startLocalVideo({
+        view: LOCAL_VIDEO_VIEW,
+        option: {
+          fillMode: 'cover',
+          profile: '720p',
+        },
+      });
+      setIsVideoStarted(true);
+      console.log('Successfully started local video');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('already started')) {
+        console.log('Video already started, updating state');
+        setIsVideoStarted(true);
+      } else {
+        throw error;
+      }
+    }
+  }, [isVideoStarted]);
+
+  // Helper function to start local audio
+  const startLocalAudio = useCallback(async () => {
+    if (isAudioStarted) return;
+
+    try {
+      await trtc.startLocalAudio();
+      setIsAudioStarted(true);
+      console.log('Successfully started local audio');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('already started')) {
+        console.log('Audio already started, updating state');
+        setIsAudioStarted(true);
+      } else {
+        throw error;
+      }
+    }
+  }, [isAudioStarted]);
+
   const startLocalMedia = useCallback(async () => {
     // Prevent multiple simultaneous calls
     if (isStartingMediaRef.current) {
@@ -104,53 +190,27 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
         return;
       }
 
-      // Only start video if not already started
-      if (!isVideoStarted) {
-        try {
-          await trtc.startLocalVideo({
-            view: LOCAL_VIDEO_VIEW,
-            option: {
-              fillMode: 'cover',
-              profile: '720p',
-            },
-          });
-          setIsVideoStarted(true);
-          console.log('Successfully started local video');
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('already started')) {
-            console.log('Video already started, updating state');
-            setIsVideoStarted(true);
-          } else {
-            throw error;
-          }
-        }
-      }
-
-      // Only start audio if not already started
-      if (!isAudioStarted) {
-        try {
-          await trtc.startLocalAudio();
-          setIsAudioStarted(true);
-          console.log('Successfully started local audio');
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('already started')) {
-            console.log('Audio already started, updating state');
-            setIsAudioStarted(true);
-          } else {
-            throw error;
-          }
-        }
-      }
+      // Start video and audio
+      await startLocalVideo();
+      await startLocalAudio();
     } catch (error) {
       console.error('Failed to start local video/audio:', error);
     } finally {
       isStartingMediaRef.current = false;
     }
-  }, [isVideoStarted, isAudioStarted, waitForVideoContainers]);
+  }, [isVideoStarted, isAudioStarted, waitForVideoContainers, startLocalVideo, startLocalAudio]);
+
+  // Helper function to schedule media start
+  const scheduleMediaStart = useCallback(() => {
+    // Clear any existing timeout to prevent multiple calls
+    if (videoStartTimeoutRef.current) {
+      clearTimeout(videoStartTimeoutRef.current);
+    }
+
+    videoStartTimeoutRef.current = setTimeout(async () => {
+      await startLocalMedia();
+    }, 300); // Increased delay to ensure DOM is ready
+  }, [startLocalMedia]);
 
   const joinRoom = useCallback(
     async (roomId: number) => {
@@ -167,28 +227,13 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
         retryCountRef.current = 0; // Reset retry count
 
         // Exit any existing room first to prevent "already start" error
-        try {
-          console.log('Exiting existing room...');
-          await trtc.exitRoom();
-          console.log('Successfully exited existing room');
-        } catch (error) {
-          // Ignore errors when exiting room that doesn't exist
-          console.log('No existing room to exit or error during exit:', error);
-        }
+        await exitExistingRoom();
 
-        const { sdkAppId, userSig } = genTestUserSig({
-          userId,
-        });
+        // Generate user signature via API
+        const { sdkAppId, userSig } = await generateUserSignature(userId);
 
-        console.log('Entering room with sdkAppId:', sdkAppId);
-        await trtc.enterRoom({
-          roomId,
-          sdkAppId,
-          userId,
-          userSig,
-        });
-
-        console.log('Successfully entered room');
+        // Enter TRTC room
+        await enterTRTCRoom(roomId, userId, sdkAppId, userSig);
 
         // Set room ID first so the video container renders
         setCurrentRoomId(roomId);
@@ -196,15 +241,8 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
         hasJoinedRef.current = true;
         setIsJoining(false);
 
-        // Wait a bit for the DOM to update, then start video
-        // Clear any existing timeout to prevent multiple calls
-        if (videoStartTimeoutRef.current) {
-          clearTimeout(videoStartTimeoutRef.current);
-        }
-
-        videoStartTimeoutRef.current = setTimeout(async () => {
-          await startLocalMedia();
-        }, 300); // Increased delay to ensure DOM is ready
+        // Schedule media start after a delay
+        scheduleMediaStart();
       } catch (error) {
         console.error('Failed to join room:', error);
         setJoinError(
@@ -213,47 +251,83 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
         setIsJoining(false);
       }
     },
-    [userId, startLocalMedia]
+    [userId, exitExistingRoom, generateUserSignature, enterTRTCRoom, scheduleMediaStart]
   );
+
+  // Helper function to stop local video
+  const stopLocalVideo = useCallback(async () => {
+    if (!isVideoStarted) return;
+
+    try {
+      await trtc.stopLocalVideo();
+    } catch (error) {
+      console.log('Error stopping local video:', error);
+    }
+  }, [isVideoStarted]);
+
+  // Helper function to stop local audio
+  const stopLocalAudio = useCallback(async () => {
+    if (!isAudioStarted) return;
+
+    try {
+      await trtc.stopLocalAudio();
+    } catch (error) {
+      console.log('Error stopping local audio:', error);
+    }
+  }, [isAudioStarted]);
+
+  // Helper function to reset room state
+  const resetRoomState = useCallback(() => {
+    setIsVideoStarted(false);
+    setIsAudioStarted(false);
+    setCurrentRoomId(null);
+    hasJoinedRef.current = false;
+    retryCountRef.current = 0;
+    isStartingMediaRef.current = false;
+  }, []);
+
+  // Helper function to clear video start timeout
+  const clearVideoStartTimeout = useCallback(() => {
+    if (videoStartTimeoutRef.current) {
+      clearTimeout(videoStartTimeoutRef.current);
+      videoStartTimeoutRef.current = null;
+    }
+  }, []);
 
   const exitRoom = useCallback(async () => {
     try {
       // Stop video and audio if they're running
-      if (isVideoStarted) {
-        try {
-          await trtc.stopLocalVideo();
-        } catch (error) {
-          console.log('Error stopping local video:', error);
-        }
-      }
+      await stopLocalVideo();
+      await stopLocalAudio();
 
-      if (isAudioStarted) {
-        try {
-          await trtc.stopLocalAudio();
-        } catch (error) {
-          console.log('Error stopping local audio:', error);
-        }
-      }
-
+      // Exit TRTC room
       await trtc.exitRoom();
 
       // Reset room state
-      setIsVideoStarted(false);
-      setIsAudioStarted(false);
-      setCurrentRoomId(null);
-      hasJoinedRef.current = false;
-      retryCountRef.current = 0;
-      isStartingMediaRef.current = false;
-
-      // Clear video start timeout
-      if (videoStartTimeoutRef.current) {
-        clearTimeout(videoStartTimeoutRef.current);
-        videoStartTimeoutRef.current = null;
-      }
+      resetRoomState();
+      clearVideoStartTimeout();
     } catch (error) {
       console.error('Failed to exit room:', error);
     }
-  }, [isVideoStarted, isAudioStarted]);
+  }, [stopLocalVideo, stopLocalAudio, resetRoomState, clearVideoStartTimeout]);
+
+  // Helper function for cleanup on unmount
+  const cleanupOnUnmount = useCallback(() => {
+    // Clean up room state only when component unmounts
+    try {
+      trtc.exitRoom();
+    } catch (error) {
+      console.log('Error during cleanup exitRoom:', error);
+    }
+
+    hasJoinedRef.current = false;
+    hasInitializedRef.current = false;
+    setIsVideoStarted(false);
+    setIsAudioStarted(false);
+    setCurrentRoomId(null);
+    retryCountRef.current = 0;
+    isStartingMediaRef.current = false;
+  }, []);
 
   // Auto-join room when component mounts - only run once
   useEffect(() => {
@@ -269,23 +343,10 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
 
     return () => {
       clearTimeout(joinTimeout);
-      // Clean up room state only when component unmounts
-      try {
-        trtc.exitRoom();
-      } catch (error) {
-        console.log('Error during cleanup exitRoom:', error);
-      }
-
-      hasJoinedRef.current = false;
-      hasInitializedRef.current = false;
-      setIsVideoStarted(false);
-      setIsAudioStarted(false);
-      setCurrentRoomId(null);
-      retryCountRef.current = 0;
-      isStartingMediaRef.current = false;
+      cleanupOnUnmount();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]); // Remove joinRoom from dependencies to prevent infinite loop
+  }, [userId, cleanupOnUnmount]); // Remove joinRoom from dependencies to prevent infinite loop
 
   return {
     currentRoomId,
