@@ -10,7 +10,7 @@ import {
   ErrorState,
   LoadingState,
   MediaControls,
-  VideoLayout,
+  PatientVideoLayout,
 } from '@/components';
 
 const PatientVideoContainer = () => {
@@ -79,7 +79,7 @@ const PatientVideoContainer = () => {
 
   return (
     <div className="relative">
-      <VideoLayout key={currentRoomId || 'waiting'} remoteUsers={remoteUsers} />
+      <PatientVideoLayout key={currentRoomId || 'waiting'} remoteUsers={remoteUsers} />
 
       <MediaControls
         isVideoOn={isVideoOn}

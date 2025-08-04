@@ -1,4 +1,11 @@
+export { default as AudioVideoConfigurationPanel } from './AudioVideoConfigurationPanel';
+export { default as DoctorVideoLayout } from './DoctorVideoLayout';
+export { default as EndCallButton } from './EndCallButton';
 export { default as ErrorState } from './ErrorState';
 export { default as LoadingState } from './LoadingState';
 export { default as MediaControls } from './MediaControls';
+export { default as MicrophoneButton } from './MicrophoneButton';
+export { default as PatientVideoLayout } from './PatientVideoLayout';
+export { default as TakeScreenshotButton } from './TakeScreenshotButton';
+export { default as VideoButton } from './VideoButton';
 export { default as VideoLayout } from './VideoLayout';
