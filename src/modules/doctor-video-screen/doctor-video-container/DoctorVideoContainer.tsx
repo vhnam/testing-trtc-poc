@@ -10,15 +10,15 @@ import {
 } from '@/constants/room';
 
 import { genTestUserSig } from '@/utils/generateTestUserSig';
+import { cn } from '@/utils/ui';
 
 import { type PatientInvitationSchema } from '@/schemas/PatientInvitation.schema';
 
 import userInfoStore from '@/stores/userInfo.store';
 
-import ConfigButton from '@/components/ConfigButton';
+import AudioVideoConfigurationPanel from '@/components/AudioVideoConfigurationPanel';
 import EndCallButton from '@/components/EndCallButton';
 import MicrophoneButton from '@/components/MicrophoneButton';
-import NetworkStatus from '@/components/NetworkStatus/NetworkStatus';
 import TakeScreenshotButton from '@/components/TakeScreenshotButton';
 import VideoButton from '@/components/VideoButton';
 
@@ -32,6 +32,7 @@ const DoctorVideoContainer = () => {
   const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
   const [isInCall, setIsInCall] = useState(false);
   const [networkQuality, setNetworkQuality] = useState<NetworkQuality>();
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     userInfo: { userId },
@@ -179,28 +180,30 @@ const DoctorVideoContainer = () => {
     <div>
       <div className="flex justify-center w-full h-[calc(100vh-68px)] items-center relative">
         {isInCall && (
-          <div className="w-[500px] h-[640px]">
-            <div className="w-full h-[calc(100%-38px)] relative">
+          <div className="w-[900px] h-[720px]">
+            <div className="w-full h-full bg-gray-200 rounded-t-lg overflow-hidden">
+              <div
+                id={REMOTE_VIDEO_VIEW}
+                className="w-full h-full [&_video]:align-top"
+              />
+            </div>
+
+            <div className="relative">
               <div
                 id={LOCAL_VIDEO_VIEW}
-                className="absolute left-6 bottom-4 w-[100px] h-[128px] bg-white [&_video]:align-top shadow-lg rounded-lg overflow-hidden"
+                className={cn(
+                  'absolute left-6 w-[100px] h-[128px] bg-white [&_video]:align-top shadow-lg rounded-lg overflow-hidden',
+                  {
+                    'bottom-[342px]': isOpen,
+                    'bottom-[98px]': !isOpen,
+                  }
+                )}
               />
-              <div className="w-full h-full bg-gray-200 rounded-lg overflow-hidden">
-                <div
-                  id={REMOTE_VIDEO_VIEW}
-                  className="w-full h-full [&_video]:align-top"
-                />
-              </div>
-            </div>
-            <div className="bg-white grid grid-cols-2">
-              <div className="flex justify-between items-center p-2">
-                <p className="text-sm">Your network quality</p>
-                <NetworkStatus value={networkQuality?.uplinkNetworkQuality} />
-              </div>
-              <div className="flex justify-between items-center p-2">
-                <p className="text-sm">Patient network quality</p>
-                <NetworkStatus value={networkQuality?.downlinkNetworkQuality} />
-              </div>
+              <AudioVideoConfigurationPanel
+                isOpen={isOpen}
+                networkQuality={networkQuality}
+                setIsOpen={setIsOpen}
+              />
             </div>
           </div>
         )}
@@ -210,7 +213,7 @@ const DoctorVideoContainer = () => {
         <div className="flex justify-center">
           {isInCall ? (
             <div className="flex items-center justify-between w-[500px]">
-              <ConfigButton onClick={() => {}} />
+              <div>&nbsp;</div>
               <div className="flex gap-4">
                 <MicrophoneButton
                   isMicrophoneOn={isMicrophoneOn}
