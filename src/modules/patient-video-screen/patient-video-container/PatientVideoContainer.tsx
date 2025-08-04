@@ -1,7 +1,9 @@
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef } from 'react';
-import { useStore } from 'zustand';
 import { toast } from 'sonner';
+import { useStore } from 'zustand';
+
+import { DEFAULT_ROOM_ID } from '@/constants/room';
 
 import { useMediaControls, useRemoteUsers, useTRTCRoom } from '@/hooks';
 
@@ -13,6 +15,7 @@ import {
   MediaControls,
   PatientVideoLayout,
 } from '@/components';
+import { Button } from '@/components/ui/button';
 
 const PatientVideoContainer = () => {
   const router = useRouter();
@@ -23,7 +26,15 @@ const PatientVideoContainer = () => {
   } = useStore(userInfoStore);
 
   // Custom hooks
-  const { currentRoomId, isJoining, joinError, exitRoom, isVideoStarted } = useTRTCRoom();
+  const {
+    currentRoomId,
+    isJoining,
+    joinError,
+    exitRoom,
+    joinRoom,
+    isVideoStarted,
+    startLocalMedia,
+  } = useTRTCRoom();
 
   const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
     useMediaControls({ isVideoStarted });
@@ -47,7 +58,7 @@ const PatientVideoContainer = () => {
       description: 'You will be redirected to the home page.',
       duration: 3000,
     });
-    
+
     // Wait a bit for the toast to be visible, then end the call
     setTimeout(async () => {
       await handleEndCall();
@@ -68,21 +79,37 @@ const PatientVideoContainer = () => {
       hasSetupEventListenersRef.current = false;
       cleanupEventListeners();
     };
-  }, [userId, setupEventListeners, cleanupEventListeners, handleEndCall, handleDoctorEndCall]);
+  }, [
+    userId,
+    setupEventListeners,
+    cleanupEventListeners,
+    handleEndCall,
+    handleDoctorEndCall,
+  ]);
 
-  // Check for existing remote users when room is joined
+  // Check for existing remote users when room is joined and start local media
   useEffect(() => {
     if (currentRoomId && !isJoining) {
-      console.log('Room joined, checking for existing remote users...');
-      // Add a small delay to ensure everything is ready
+      console.log(
+        'Room joined, starting local media and checking for existing remote users...'
+      );
+
+      // Start local media
+      setTimeout(() => {
+        console.log('Patient starting local media');
+        startLocalMedia();
+      }, 1000);
+
+      // Check for existing remote users
       setTimeout(() => {
         checkExistingRemoteUsers();
-      }, 1000);
+      }, 3000); // Increased delay to avoid timing issues
     }
-  }, [currentRoomId, isJoining, checkExistingRemoteUsers]);
+  }, [currentRoomId, isJoining, checkExistingRemoteUsers, startLocalMedia]);
 
   // Show loading state
   if (isJoining) {
+    console.log('Patient is joining, showing loading state');
     return <LoadingState />;
   }
 
@@ -93,14 +120,32 @@ const PatientVideoContainer = () => {
 
   return (
     <div className="relative">
-      <PatientVideoLayout key={currentRoomId || 'waiting'} remoteUsers={remoteUsers} />
+      {currentRoomId ? (
+        <>
+          <PatientVideoLayout remoteUsers={remoteUsers} />
 
-      <MediaControls
-        isVideoOn={isVideoOn}
-        isMicrophoneOn={isMicrophoneOn}
-        onToggleMicrophone={toggleMicrophone}
-        onToggleVideo={toggleVideo}
-      />
+          <MediaControls
+            isVideoOn={isVideoOn}
+            isMicrophoneOn={isMicrophoneOn}
+            onToggleMicrophone={toggleMicrophone}
+            onToggleVideo={toggleVideo}
+          />
+        </>
+      ) : (
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">Patient Video Call</h2>
+            <p className="text-gray-600 mb-8">Click below to join the room</p>
+            <Button
+              type="button"
+              onClick={() => joinRoom(DEFAULT_ROOM_ID)}
+              variant="outline"
+            >
+              Join Room
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

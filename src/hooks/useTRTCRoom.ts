@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
-import {
-  DEFAULT_ROOM_ID,
-  LOCAL_VIDEO_VIEW,
-  REMOTE_VIDEO_VIEW,
-} from '@/constants/room';
+import { LOCAL_VIDEO_VIEW, REMOTE_VIDEO_VIEW } from '@/constants/room';
 
 import { getTRTCInstance } from '@/utils/trtc';
 
@@ -24,7 +20,7 @@ interface UseTRTCRoomReturn {
   startLocalMedia: () => Promise<void>;
 }
 
-export const useTRTCRoom = (): UseTRTCRoomReturn => {
+export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
   const [currentRoomId, setCurrentRoomId] = useState<number | null>(null);
   const [isJoining, setIsJoining] = useState(false);
   const [isVideoStarted, setIsVideoStarted] = useState(false);
@@ -109,18 +105,24 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
   }, []);
 
   // Helper function to enter TRTC room
-  const enterTRTCRoom = useCallback(async (roomId: number, userId: string, sdkAppId: number, userSig: string) => {
-    console.log('Entering room with sdkAppId:', sdkAppId);
-    await trtc.enterRoom({
-      roomId,
-      sdkAppId,
-      userId,
-      userSig,
-    });
-    console.log('Successfully entered room');
-  }, []);
-
-
+  const enterTRTCRoom = useCallback(
+    async (
+      roomId: number,
+      userId: string,
+      sdkAppId: number,
+      userSig: string
+    ) => {
+      console.log('Entering room with sdkAppId:', sdkAppId);
+      await trtc.enterRoom({
+        roomId,
+        sdkAppId,
+        userId,
+        userSig,
+      });
+      console.log('Successfully entered room');
+    },
+    []
+  );
 
   // Helper function to start local video
   const startLocalVideo = useCallback(async () => {
@@ -137,7 +139,8 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
       setIsVideoStarted(true);
       console.log('Successfully started local video');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('already started')) {
         console.log('Video already started, updating state');
         setIsVideoStarted(true);
@@ -156,7 +159,8 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
       setIsAudioStarted(true);
       console.log('Successfully started local audio');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('already started')) {
         console.log('Audio already started, updating state');
         setIsAudioStarted(true);
@@ -198,7 +202,13 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
     } finally {
       isStartingMediaRef.current = false;
     }
-  }, [isVideoStarted, isAudioStarted, waitForVideoContainers, startLocalVideo, startLocalAudio]);
+  }, [
+    isVideoStarted,
+    isAudioStarted,
+    waitForVideoContainers,
+    startLocalVideo,
+    startLocalAudio,
+  ]);
 
   // Helper function to schedule media start
   const scheduleMediaStart = useCallback(() => {
@@ -251,7 +261,13 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
         setIsJoining(false);
       }
     },
-    [userId, exitExistingRoom, generateUserSignature, enterTRTCRoom, scheduleMediaStart]
+    [
+      userId,
+      exitExistingRoom,
+      generateUserSignature,
+      enterTRTCRoom,
+      scheduleMediaStart,
+    ]
   );
 
   // Helper function to stop local video
@@ -329,24 +345,22 @@ export const useTRTCRoom = (): UseTRTCRoomReturn => {
     isStartingMediaRef.current = false;
   }, []);
 
-  // Auto-join room when component mounts - only run once
   useEffect(() => {
-    if (!userId || hasJoinedRef.current || hasInitializedRef.current) return;
+    if (
+      !userId ||
+      hasJoinedRef.current ||
+      hasInitializedRef.current ||
+      !autoJoin
+    )
+      return;
 
     hasInitializedRef.current = true;
-    console.log('Setting up TRTC room and joining...');
-
-    // Join the default room with a delay to ensure TRTC is ready
-    const joinTimeout = setTimeout(() => {
-      joinRoom(DEFAULT_ROOM_ID);
-    }, 500); // Increased initial delay
+    console.log('Setting up TRTC room and joining...', { userId, autoJoin });
 
     return () => {
-      clearTimeout(joinTimeout);
       cleanupOnUnmount();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, cleanupOnUnmount]); // Remove joinRoom from dependencies to prevent infinite loop
+  }, [userId, cleanupOnUnmount, autoJoin]); // Removed auto-join logic
 
   return {
     currentRoomId,

@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
 import { DEFAULT_ROOM_ID } from '@/constants/room';
-import { useMediaControls, useNetworkQuality, useRemoteUsers, useTRTCRoom } from '@/hooks';
+
+import {
+  useMediaControls,
+  useNetworkQuality,
+  useRemoteUsers,
+  useTRTCRoom,
+} from '@/hooks';
 
 import userInfoStore from '@/stores/userInfo.store';
 
@@ -36,20 +42,13 @@ const DoctorVideoContainer = () => {
     exitRoom,
     joinRoom,
     isVideoStarted,
-  } = useTRTCRoom();
+  } = useTRTCRoom(); // No auto-join in hook anymore, doctor joins manually
 
-  const {
-    isVideoOn,
-    isMicrophoneOn,
-    toggleMicrophone,
-    toggleVideo,
-  } = useMediaControls({ isVideoStarted });
+  const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
+    useMediaControls({ isVideoStarted });
 
-  const {
-    remoteUsers,
-    setupEventListeners,
-    cleanupEventListeners,
-  } = useRemoteUsers();
+  const { remoteUsers, setupEventListeners, cleanupEventListeners } =
+    useRemoteUsers();
 
   const {
     networkQuality,
@@ -63,20 +62,25 @@ const DoctorVideoContainer = () => {
     router.push('/');
   }, [exitRoom, router]);
 
-  // Handle start call
-  const handleStartCall = useCallback(async () => {
-    if (!userId) return;
-    
-    console.log('Starting call as doctor...');
-    await joinRoom(DEFAULT_ROOM_ID);
-  }, [userId, joinRoom]);
+  // Handle start call with patient ID
+  const handleStartCall = useCallback(
+    async (data: { patientId: string }) => {
+      if (!userId) return;
+
+      console.log('Starting call as doctor with DEFAULT_ROOM_ID:', DEFAULT_ROOM_ID);
+      await joinRoom(DEFAULT_ROOM_ID);
+    },
+    [userId, joinRoom]
+  );
 
   // Setup remote user event listeners - only run once
   useEffect(() => {
     if (!userId || hasSetupEventListenersRef.current) return;
 
     hasSetupEventListenersRef.current = true;
-    console.log('Setting up remote user event listeners in DoctorVideoContainer...');
+    console.log(
+      'Setting up remote user event listeners in DoctorVideoContainer...'
+    );
     setupEventListeners();
     setupNetworkQualityListener();
 
@@ -85,7 +89,13 @@ const DoctorVideoContainer = () => {
       cleanupEventListeners();
       cleanupNetworkQualityListener();
     };
-  }, [userId, setupEventListeners, cleanupEventListeners, setupNetworkQualityListener, cleanupNetworkQualityListener]);
+  }, [
+    userId,
+    setupEventListeners,
+    cleanupEventListeners,
+    setupNetworkQualityListener,
+    cleanupNetworkQualityListener,
+  ]);
 
   // Show loading state
   if (isJoining) {
@@ -112,9 +122,12 @@ const DoctorVideoContainer = () => {
   return (
     <div>
       <div className="flex justify-center w-full h-[calc(100vh-68px)] items-center relative">
-        {currentRoomId ? (
+        {currentRoomId && (
           <div className="w-[900px] h-[720px]">
-            <DoctorVideoLayout remoteUsers={remoteUsers} isConfigPanelOpen={isOpen} />
+            <DoctorVideoLayout
+              remoteUsers={remoteUsers}
+              isConfigPanelOpen={isOpen}
+            />
 
             <div className="relative">
               <AudioVideoConfigurationPanel
@@ -123,11 +136,6 @@ const DoctorVideoContainer = () => {
                 setIsOpen={setIsOpen}
               />
             </div>
-          </div>
-        ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Doctor Video Call</h2>
-            <p className="text-gray-600">Click below to start a call</p>
           </div>
         )}
       </div>
@@ -142,10 +150,7 @@ const DoctorVideoContainer = () => {
                   isMicrophoneOn={isMicrophoneOn}
                   onClick={toggleMicrophone}
                 />
-                <VideoButton
-                  isVideoOn={isVideoOn}
-                  onClick={toggleVideo}
-                />
+                <VideoButton isVideoOn={isVideoOn} onClick={toggleVideo} />
                 <TakeScreenshotButton />
               </div>
               <EndCallButton onClick={handleEndCall} />

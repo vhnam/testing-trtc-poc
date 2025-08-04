@@ -153,8 +153,10 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
             error instanceof Error ? error.message : String(error);
           if (errorMessage.includes('already started')) {
             console.log(`Remote video already started for user: ${userId}`);
+          } else if (errorMessage.includes('abort')) {
+            console.log(`Remote video start aborted for user: ${userId} - user may have left`);
           } else {
-            throw error;
+            console.error(`Failed to start remote video for user ${userId}:`, error);
           }
         }
       } catch (error) {
