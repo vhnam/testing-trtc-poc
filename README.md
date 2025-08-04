@@ -53,19 +53,21 @@ src/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm, yarn, or pnpm
 - Tencent TRTC SDK credentials
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd testing-trtc
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 # or
@@ -75,13 +77,15 @@ pnpm install
 ```
 
 3. Set up environment variables:
-Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory:
+
 ```env
 NEXT_PUBLIC_DEFAULT_ROOM_ID=your_room_id
 # Add other TRTC SDK credentials as needed
 ```
 
 4. Run the development server:
+
 ```bash
 npm run dev
 # or
@@ -95,11 +99,13 @@ Open [https://localhost:3000](https://localhost:3000) with your browser to see t
 ## 📱 Usage
 
 ### Login Screen
+
 - Access the application at the root URL
 - Choose your role (Doctor or Patient)
 - Enter your credentials to proceed
 
 ### Doctor Interface
+
 - Navigate to `/doctor` to access the doctor's video interface
 - Features include:
   - Video call controls
@@ -108,6 +114,7 @@ Open [https://localhost:3000](https://localhost:3000) with your browser to see t
   - Network status monitoring
 
 ### Patient Interface
+
 - Navigate to `/patient` to access the patient's video interface
 - Features include:
   - Video call participation
@@ -125,9 +132,11 @@ Open [https://localhost:3000](https://localhost:3000) with your browser to see t
 ## 🔧 Configuration
 
 ### Development with HTTPS
+
 The development server runs with HTTPS enabled for testing TRTC SDK features that require secure connections.
 
 ### Code Quality
+
 - ESLint for code linting
 - Prettier for code formatting
 - Husky for git hooks
@@ -136,6 +145,7 @@ The development server runs with HTTPS enabled for testing TRTC SDK features tha
 ## 📦 Dependencies
 
 ### Core Dependencies
+
 - **Next.js 15.4.5** - React framework
 - **React 19.1.0** - UI library
 - **TRTC SDK v5** - Video conferencing
@@ -143,6 +153,7 @@ The development server runs with HTTPS enabled for testing TRTC SDK features tha
 - **React Hook Form** - Form handling
 
 ### UI Dependencies
+
 - **Tailwind CSS v4** - Styling
 - **shadcn/ui** - Component library
 - **Radix UI** - Accessible primitives
@@ -151,6 +162,7 @@ The development server runs with HTTPS enabled for testing TRTC SDK features tha
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
+
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
 1. Push your code to GitHub
@@ -159,6 +171,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 4. Deploy
 
 ### Other Platforms
+
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
 
 ## 🤝 Contributing
@@ -176,6 +189,7 @@ This project is private and proprietary.
 ## 🆘 Support
 
 For support and questions, please refer to:
+
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TRTC SDK Documentation](https://web.sdk.qcloud.com/trtc/miniapp/doc/en/)
 - [shadcn/ui Documentation](https://ui.shadcn.com/)

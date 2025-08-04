@@ -8,10 +8,11 @@
   "importOrder": [
     "^@/constants/(.*)$",
     "^@/utils/(.*)$",
+    "^@/hooks(.*)$",
     "^@/models/(.*)$",
     "^@/schemas/(.*)$",
     "^@/stores/(.*)$",
-    "^@/components/(.*)$",
+    "^@/components(.*)$",
     "^@/modules/(.*)$",
     "^[./]"
   ],
