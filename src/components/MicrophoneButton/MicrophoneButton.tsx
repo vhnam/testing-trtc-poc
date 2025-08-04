@@ -1,4 +1,4 @@
-import { BiMicrophone, BiMicrophoneOff } from 'react-icons/bi';
+import { Mic, MicOff } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +20,7 @@ const MicrophoneButton = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <Button variant="outline" type="button" onClick={onClick}>
-          {isMicrophoneOn ? <BiMicrophone /> : <BiMicrophoneOff />}
+          {isMicrophoneOn ? <Mic /> : <MicOff />}
         </Button>
       </TooltipTrigger>
       <TooltipContent>

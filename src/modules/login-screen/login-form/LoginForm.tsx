@@ -15,20 +15,13 @@ export interface LoginFormProps {
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<LoginSchema>({
+  const { register, handleSubmit, control } = useForm<LoginSchema>({
     defaultValues: {
       userId: '',
       role: roles[0].value,
     },
     resolver: yupResolver(loginSchema),
   });
-
-  console.log(errors);
 
   return (
     <form onSubmit={handleSubmit(onLogin)} className="space-y-6">

@@ -66,11 +66,9 @@ const DoctorVideoContainer = () => {
 
   const handleRemoteUserEnter = useCallback(
     async (event: { userId: string }) => {
-      if (!trtc) return;
-
       console.log('Remote user entered:', event.userId);
     },
-    [trtc]
+    []
   );
 
   const handleRemoteUserExit = useCallback(
@@ -78,27 +76,25 @@ const DoctorVideoContainer = () => {
       console.log('Remote user exited:', event.userId);
 
       // Stop remote video for the exiting user
-      if (trtc) {
-        try {
-          await trtc.stopRemoteVideo({
-            userId: event.userId,
-            streamType: 'main' as TRTCStreamType,
-          });
-          console.log(`Stopped remote video for user: ${event.userId}`);
-        } catch (error) {
-          console.error(
-            `Failed to stop remote video for user ${event.userId}:`,
-            error
-          );
-        }
+      try {
+        await trtc.stopRemoteVideo({
+          userId: event.userId,
+          streamType: 'main' as TRTCStreamType,
+        });
+        console.log(`Stopped remote video for user: ${event.userId}`);
+      } catch (error) {
+        console.error(
+          `Failed to stop remote video for user ${event.userId}:`,
+          error
+        );
       }
     },
-    [trtc]
+    []
   );
 
   const handleStartCall = async (data: PatientInvitationSchema) => {
     try {
-      if (!trtc || !userId) return;
+      if (!userId) return;
 
       setIsInCall(true);
 
@@ -138,7 +134,7 @@ const DoctorVideoContainer = () => {
   const handleRemoteVideoAvailable = useCallback(
     (event: { userId: string; streamType: TRTCStreamType }) => {
       try {
-        if (!trtc || !event.userId) return;
+        if (!event.userId) return;
         const userId = event.userId;
         const streamType = event.streamType;
         trtc.startRemoteVideo({
@@ -150,7 +146,7 @@ const DoctorVideoContainer = () => {
         console.error('Failed to start video:', error);
       }
     },
-    [trtc]
+    []
   );
 
   const handleNetworkQuality = (event: NetworkQuality) => {
@@ -158,7 +154,7 @@ const DoctorVideoContainer = () => {
   };
 
   useEffect(() => {
-    if (!trtc || !userId) return;
+    if (!userId) return;
 
     trtc.on(TRTC.EVENT.NETWORK_QUALITY, handleNetworkQuality);
     trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
@@ -176,7 +172,6 @@ const DoctorVideoContainer = () => {
     handleRemoteUserEnter,
     handleRemoteUserExit,
     handleRemoteVideoAvailable,
-    trtc,
     userId,
   ]);
 

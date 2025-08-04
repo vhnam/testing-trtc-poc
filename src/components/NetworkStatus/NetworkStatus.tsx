@@ -1,4 +1,4 @@
-import { BiSignal3 } from 'react-icons/bi';
+import { Signal } from 'lucide-react';
 import { NetworkQualityValue } from 'trtc-sdk-v5';
 
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
@@ -22,7 +22,7 @@ const NetworkStatus = ({ value }: NetworkStatusProps) => {
   return (
     <Badge asChild variant={colors[value ?? 0]}>
       <span>
-        <BiSignal3 size={24} /> {status[value ?? 0]}
+        <Signal /> {status[value ?? 0]}
       </span>
     </Badge>
   );

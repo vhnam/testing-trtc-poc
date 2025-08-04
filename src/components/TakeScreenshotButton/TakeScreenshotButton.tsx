@@ -1,8 +1,9 @@
+import { Camera } from 'lucide-react';
 import { useState } from 'react';
-import { BiCamera } from 'react-icons/bi';
+
+import { REMOTE_VIDEO_VIEW } from '@/constants/room';
 
 import { downloadScreenshot } from '@/utils/screenshot';
-import { REMOTE_VIDEO_VIEW } from '@/constants/room';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +36,7 @@ const TakeScreenshotButton = () => {
           onClick={handleTakeScreenshot}
           disabled={isCapturing}
         >
-          <BiCamera className={isCapturing ? 'animate-pulse' : ''} />
+          <Camera className={isCapturing ? 'animate-pulse' : ''} />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

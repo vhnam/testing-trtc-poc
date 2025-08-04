@@ -1,4 +1,4 @@
-import { BiCog } from 'react-icons/bi';
+import { Settings2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,7 @@ const ConfigButton = ({ onClick }: ConfigButtonProps) => {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button variant="outline" type="button" onClick={onClick}>
-          <BiCog />
+          <Settings2 />
         </Button>
       </TooltipTrigger>
       <TooltipContent>Check audio and video</TooltipContent>

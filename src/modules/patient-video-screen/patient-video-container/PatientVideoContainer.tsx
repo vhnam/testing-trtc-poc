@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TRTC, { type TRTCStreamType } from 'trtc-sdk-v5';
 import { useStore } from 'zustand';
 
@@ -16,8 +16,9 @@ import userInfoStore from '@/stores/userInfo.store';
 import MicrophoneButton from '@/components/MicrophoneButton';
 import VideoButton from '@/components/VideoButton';
 
+const trtc = TRTC.create();
+
 const PatientVideoContainer = () => {
-  const [trtc, setTrtc] = useState<TRTC | null>(null);
   const router = useRouter();
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
@@ -32,7 +33,6 @@ const PatientVideoContainer = () => {
 
   const handleToggleMicrophone = async () => {
     try {
-      if (!trtc) return;
       await trtc.updateLocalAudio({ mute: isMicrophoneOn });
       setIsMicrophoneOn(!isMicrophoneOn);
     } catch (error) {
@@ -42,7 +42,6 @@ const PatientVideoContainer = () => {
 
   const handleToggleVideo = async () => {
     try {
-      if (!trtc) return;
       await trtc.updateLocalVideo({ mute: isVideoOn });
       setIsVideoOn(!isVideoOn);
     } catch (error) {
@@ -50,9 +49,7 @@ const PatientVideoContainer = () => {
     }
   };
 
-  const handleEndCall = async () => {
-    if (!trtc) return;
-
+  const handleEndCall = useCallback(async () => {
     try {
       await trtc.exitRoom();
       await trtc.stopLocalAudio();
@@ -69,20 +66,19 @@ const PatientVideoContainer = () => {
     } catch (error) {
       console.error('Failed to end call:', error);
     }
-  };
+  }, [remoteUsers, router]);
 
   const handleRemoteUserEnter = async (event: { userId: string }) => {
-    if (!trtc) return;
-
     console.log('Remote user entered:', event.userId);
     setRemoteUsers((prev) => [...prev, event.userId]);
   };
 
-  const handleRemoteUserExit = async (event: { userId: string }) => {
-    console.log('Remote user exited:', event.userId);
+  const handleRemoteUserExit = useCallback(
+    async (event: { userId: string }) => {
+      console.log('Remote user exited:', event.userId);
 
-    // Stop remote video for the exiting user
-    if (trtc) {
+      // Stop remote video for the exiting user
+
       try {
         await trtc.stopRemoteVideo({
           userId: event.userId,
@@ -97,63 +93,67 @@ const PatientVideoContainer = () => {
       } finally {
         await handleEndCall();
       }
-    }
 
-    setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
-  };
+      setRemoteUsers((prev) => prev.filter((id) => id !== event.userId));
+    },
+    [handleEndCall]
+  );
 
-  const joinRoom = async (roomId: number) => {
-    if (!trtc || !userId) return;
+  const joinRoom = useCallback(
+    async (roomId: number) => {
+      if (!userId) return;
 
-    try {
-      setIsJoining(true);
-      setJoinError('');
+      try {
+        setIsJoining(true);
+        setJoinError('');
 
-      const { sdkAppId, userSig } = genTestUserSig({
-        userId,
-      });
+        const { sdkAppId, userSig } = genTestUserSig({
+          userId,
+        });
 
-      await trtc.enterRoom({
-        roomId,
-        sdkAppId,
-        userId,
-        userSig,
-      });
+        await trtc.enterRoom({
+          roomId,
+          sdkAppId,
+          userId,
+          userSig,
+        });
 
-      // Set room ID first so the video container renders
-      setCurrentRoomId(roomId);
-      setIsJoining(false);
+        // Set room ID first so the video container renders
+        setCurrentRoomId(roomId);
+        setIsJoining(false);
 
-      // Wait a bit for the DOM to update, then start video
-      setTimeout(async () => {
-        try {
-          await trtc.startLocalVideo({
-            view: LOCAL_VIDEO_VIEW,
-            option: {
-              fillMode: 'cover',
-              profile: '720p',
-            },
-          });
-          await trtc.startLocalAudio();
-        } catch (error) {
-          console.error('Failed to start local video/audio:', error);
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Failed to join room:', error);
-      setJoinError(
-        'Failed to join the room. Please check the invitation link.'
-      );
-      setIsJoining(false);
-    }
-  };
+        // Wait a bit for the DOM to update, then start video
+        setTimeout(async () => {
+          try {
+            await trtc.startLocalVideo({
+              view: LOCAL_VIDEO_VIEW,
+              option: {
+                fillMode: 'cover',
+                profile: '720p',
+              },
+            });
+            await trtc.startLocalAudio();
+          } catch (error) {
+            console.error('Failed to start local video/audio:', error);
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Failed to join room:', error);
+        setJoinError(
+          'Failed to join the room. Please check the invitation link.'
+        );
+        setIsJoining(false);
+      }
+    },
+    [userId]
+  );
 
   const handleRemoteVideoAvailable = (event: {
     userId: string;
     streamType: TRTCStreamType;
   }) => {
     try {
-      if (!trtc || !event.userId) return;
+      if (!event.userId) return;
       const userId = event.userId;
       const streamType = event.streamType;
       trtc.startRemoteVideo({
@@ -165,20 +165,6 @@ const PatientVideoContainer = () => {
       console.error('Failed to start video:', error);
     }
   };
-
-  useEffect(() => {
-    const loadTRTC = async () => {
-      try {
-        const TRTC = (await import('trtc-sdk-v5')).default;
-        const trtcInstance = TRTC.create();
-        setTrtc(trtcInstance);
-      } catch (error) {
-        console.error('Failed to load TRTC SDK:', error);
-      }
-    };
-
-    loadTRTC();
-  }, []);
 
   useEffect(() => {
     if (!trtc || !userId) return;
@@ -201,7 +187,7 @@ const PatientVideoContainer = () => {
       trtc.off(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
       trtc.exitRoom();
     };
-  }, [trtc, userId]);
+  }, [handleRemoteUserExit, joinRoom, userId]);
 
   if (isJoining) {
     return (

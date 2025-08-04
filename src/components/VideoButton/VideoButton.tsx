@@ -1,4 +1,4 @@
-import { BiVideo, BiVideoOff } from 'react-icons/bi';
+import { Video, VideoOff } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ const VideoButton = ({ onClick, isVideoOn }: VideoButtonProps) => {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button variant="outline" type="button" onClick={onClick}>
-          {isVideoOn ? <BiVideo /> : <BiVideoOff />}
+          {isVideoOn ? <Video /> : <VideoOff />}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
