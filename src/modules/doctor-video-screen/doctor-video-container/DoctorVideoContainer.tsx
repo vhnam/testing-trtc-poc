@@ -35,6 +35,7 @@ const DoctorVideoContainer = () => {
     joinError,
     exitRoom,
     joinRoom,
+    isVideoStarted,
   } = useTRTCRoom();
 
   const {
@@ -42,7 +43,7 @@ const DoctorVideoContainer = () => {
     isMicrophoneOn,
     toggleMicrophone,
     toggleVideo,
-  } = useMediaControls();
+  } = useMediaControls({ isVideoStarted });
 
   const {
     remoteUsers,

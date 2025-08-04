@@ -22,10 +22,10 @@ const PatientVideoContainer = () => {
   } = useStore(userInfoStore);
 
   // Custom hooks
-  const { currentRoomId, isJoining, joinError, exitRoom } = useTRTCRoom();
+  const { currentRoomId, isJoining, joinError, exitRoom, isVideoStarted } = useTRTCRoom();
 
   const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
-    useMediaControls();
+    useMediaControls({ isVideoStarted });
 
   const {
     remoteUsers,

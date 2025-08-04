@@ -24,7 +24,7 @@ const PatientVideoLayout = ({ remoteUsers }: PatientVideoLayoutProps) => {
 
       <div
         id={LOCAL_VIDEO_VIEW}
-        className="absolute top-4 right-4 lg:top-12 lg:right-16 w-[120px] h-[160px] bg-gray-800 rounded-lg overflow-hidden [&_video]:align-top shadow-lg"
+        className="absolute top-4 right-4 lg:top-12 lg:right-16 w-[120px] h-[160px] bg-gray-200 rounded-lg overflow-hidden [&_video]:align-top shadow-lg"
       />
     </div>
   );
