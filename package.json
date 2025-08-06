@@ -2,12 +2,15 @@
   "name": "testing-trtc",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev --turbopack --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky install",
+    "prepare": "husky",
     "format": "prettier --write ."
   },
   "dependencies": {

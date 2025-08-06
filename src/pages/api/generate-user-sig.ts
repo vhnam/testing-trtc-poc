@@ -23,8 +23,8 @@ export default function handler(
       return res.status(400).json({ error: 'userId is required' });
     }
 
-    const sdkAppId = parseInt(process.env.NEXT_PUBLIC_SDK_APP_ID as string);
-    const secretKey = process.env.NEXT_PUBLIC_SDK_SECRET_KEY;
+    const sdkAppId = parseInt(process.env.SDK_APP_ID as string);
+    const secretKey = process.env.SDK_SECRET_KEY;
 
     if (!sdkAppId || !secretKey) {
       return res.status(500).json({ error: 'TRTC configuration not found' });

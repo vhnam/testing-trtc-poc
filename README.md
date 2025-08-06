@@ -93,11 +93,7 @@ cd testing-trtc
 2. Install dependencies:
 
 ```bash
-npm install
-# or
 yarn install
-# or
-pnpm install
 ```
 
 3. Set up environment variables:
@@ -106,8 +102,8 @@ pnpm install
 ```env
 NEXT_PUBLIC_DEFAULT_ROOM_ID=your_room_id
 
-NEXT_PUBLIC_SDK_APP_ID=your_sdk_app_id
-NEXT_PUBLIC_SDK_SECRET_KEY=your_sdk_secret_key
+SDK_APP_ID=your_sdk_app_id
+SDK_SECRET_KEY=your_sdk_secret_key
 ```
 
 4. Run the development server:
