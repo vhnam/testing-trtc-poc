@@ -11,10 +11,12 @@
     "^@/hooks(.*)$",
     "^@/models(.*)$",
     "^@/schemas(.*)$",
+    "^@/typings(.*)$",
     "^@/stores(.*)$",
     "^@/components(.*)$",
     "^@/modules(.*)$",
-    "^[./]"
+    "^[./]",
+    "^@/styles(.*)$"
   ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
