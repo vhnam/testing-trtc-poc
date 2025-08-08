@@ -2,8 +2,6 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
-import { DEFAULT_ROOM_ID } from '@/constants/room';
-
 import {
   useMediaControls,
   useNetworkQuality,
@@ -42,6 +40,7 @@ const DoctorVideoContainer = () => {
     exitRoom,
     joinRoom,
     isVideoStarted,
+    isAudioStarted,
   } = useTRTCRoom(); // No auto-join in hook anymore, doctor joins manually
 
   const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
@@ -67,8 +66,8 @@ const DoctorVideoContainer = () => {
     async (data: { patientId: string }) => {
       if (!userId) return;
 
-      console.log('Starting call as doctor with DEFAULT_ROOM_ID:', DEFAULT_ROOM_ID);
-      await joinRoom(DEFAULT_ROOM_ID);
+      console.log('Starting call as doctor with room ID:', data.patientId);
+      await joinRoom(data.patientId);
     },
     [userId, joinRoom]
   );
@@ -147,10 +146,15 @@ const DoctorVideoContainer = () => {
               <div>&nbsp;</div>
               <div className="flex gap-4">
                 <MicrophoneButton
+                  disabled={!isAudioStarted}
                   isMicrophoneOn={isMicrophoneOn}
                   onClick={toggleMicrophone}
                 />
-                <VideoButton isVideoOn={isVideoOn} onClick={toggleVideo} />
+                <VideoButton
+                  disabled={!isVideoStarted}
+                  isVideoOn={isVideoOn}
+                  onClick={toggleVideo}
+                />
                 <TakeScreenshotButton />
               </div>
               <EndCallButton onClick={handleEndCall} />

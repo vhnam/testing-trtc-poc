@@ -3,8 +3,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useStore } from 'zustand';
 
-import { DEFAULT_ROOM_ID } from '@/constants/room';
-
 import { useMediaControls, useRemoteUsers, useTRTCRoom } from '@/hooks';
 
 import userInfoStore from '@/stores/userInfo.store';
@@ -32,6 +30,7 @@ const PatientVideoContainer = () => {
     joinError,
     exitRoom,
     joinRoom,
+    isAudioStarted,
     isVideoStarted,
     startLocalMedia,
   } = useTRTCRoom();
@@ -125,10 +124,13 @@ const PatientVideoContainer = () => {
           <PatientVideoLayout remoteUsers={remoteUsers} />
 
           <MediaControls
+            isAudioStarted={isAudioStarted}
+            isVideoStarted={isVideoStarted}
             isVideoOn={isVideoOn}
             isMicrophoneOn={isMicrophoneOn}
             onToggleMicrophone={toggleMicrophone}
             onToggleVideo={toggleVideo}
+            onEndCall={handleEndCall}
           />
         </>
       ) : (
@@ -138,7 +140,7 @@ const PatientVideoContainer = () => {
             <p className="text-gray-600 mb-8">Click below to join the room</p>
             <Button
               type="button"
-              onClick={() => joinRoom(DEFAULT_ROOM_ID)}
+              onClick={() => joinRoom(userId)}
               variant="outline"
             >
               Join Room

@@ -8,4 +8,3 @@ export { default as MicrophoneButton } from './MicrophoneButton';
 export { default as PatientVideoLayout } from './PatientVideoLayout';
 export { default as TakeScreenshotButton } from './TakeScreenshotButton';
 export { default as VideoButton } from './VideoButton';
-export { default as VideoLayout } from './VideoLayout';

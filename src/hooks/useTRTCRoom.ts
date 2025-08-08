@@ -10,18 +10,20 @@ import userInfoStore from '@/stores/userInfo.store';
 const trtc = getTRTCInstance();
 
 interface UseTRTCRoomReturn {
-  currentRoomId: number | null;
+  currentRoomId: number | string | null;
   isJoining: boolean;
   isVideoStarted: boolean;
   isAudioStarted: boolean;
   joinError: string;
-  joinRoom: (roomId: number) => Promise<void>;
+  joinRoom: (roomId: number | string) => Promise<void>;
   exitRoom: () => Promise<void>;
   startLocalMedia: () => Promise<void>;
 }
 
 export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
-  const [currentRoomId, setCurrentRoomId] = useState<number | null>(null);
+  const [currentRoomId, setCurrentRoomId] = useState<number | string | null>(
+    null
+  );
   const [isJoining, setIsJoining] = useState(false);
   const [isVideoStarted, setIsVideoStarted] = useState(false);
   const [isAudioStarted, setIsAudioStarted] = useState(false);
@@ -107,14 +109,14 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
   // Helper function to enter TRTC room
   const enterTRTCRoom = useCallback(
     async (
-      roomId: number,
+      roomId: number | string,
       userId: string,
       sdkAppId: number,
       userSig: string
     ) => {
       console.log('Entering room with sdkAppId:', sdkAppId);
       await trtc.enterRoom({
-        roomId,
+        ...(typeof roomId === 'number' ? { roomId } : { strRoomId: roomId }),
         sdkAppId,
         userId,
         userSig,
@@ -136,6 +138,7 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
           profile: '720p',
         },
       });
+
       setIsVideoStarted(true);
       console.log('Successfully started local video');
     } catch (error) {
@@ -223,7 +226,7 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
   }, [startLocalMedia]);
 
   const joinRoom = useCallback(
-    async (roomId: number) => {
+    async (roomId: number | string) => {
       if (!userId) {
         console.log('No userId available, skipping join room');
         return;

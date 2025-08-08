@@ -8,15 +8,25 @@ import {
 } from '@/components/ui/tooltip';
 
 export interface VideoButtonProps {
+  disabled?: boolean;
   isVideoOn: boolean;
   onClick: () => void;
 }
 
-const VideoButton = ({ onClick, isVideoOn }: VideoButtonProps) => {
+const VideoButton = ({
+  disabled = false,
+  onClick,
+  isVideoOn,
+}: VideoButtonProps) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline" type="button" onClick={onClick}>
+        <Button
+          disabled={disabled}
+          variant="outline"
+          type="button"
+          onClick={onClick}
+        >
           {isVideoOn ? <Video /> : <VideoOff />}
         </Button>
       </TooltipTrigger>

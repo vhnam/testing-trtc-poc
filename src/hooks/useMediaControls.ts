@@ -15,14 +15,16 @@ interface UseMediaControlsProps {
   isVideoStarted?: boolean;
 }
 
-export const useMediaControls = (props?: UseMediaControlsProps): UseMediaControlsReturn => {
+export const useMediaControls = (
+  props?: UseMediaControlsProps
+): UseMediaControlsReturn => {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
 
   const toggleMicrophone = async () => {
     try {
       // Add a small delay to ensure room is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       await trtc.updateLocalAudio({ mute: isMicrophoneOn });
       setIsMicrophoneOn(!isMicrophoneOn);
@@ -41,7 +43,7 @@ export const useMediaControls = (props?: UseMediaControlsProps): UseMediaControl
       }
 
       // Add a small delay to ensure room is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       await trtc.updateLocalVideo({ mute: isVideoOn });
       setIsVideoOn(!isVideoOn);

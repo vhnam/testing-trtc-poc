@@ -1,9 +1,9 @@
-import { getAppointments } from '@/queries/appointments/appointment.query';
+import { useAppointments } from '@/queries/appointments/appointment.query';
 
 import AppointmentsTable from '../appointments-table';
 
 const AppointmentsContainer = () => {
-  const { data, isLoading } = getAppointments();
+  const { data } = useAppointments();
 
   return (
     <div className="py-12 max-w-[1200px] mx-auto">
@@ -12,7 +12,7 @@ const AppointmentsContainer = () => {
           Appointments
         </h1>
       </div>
-      <AppointmentsTable data={data?.data.data ?? []} />
+      <AppointmentsTable data={data ?? []} />
     </div>
   );
 };

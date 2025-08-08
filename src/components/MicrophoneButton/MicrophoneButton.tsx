@@ -8,18 +8,25 @@ import {
 } from '@/components/ui/tooltip';
 
 export interface MicrophoneButtonProps {
+  disabled: boolean;
   isMicrophoneOn: boolean;
   onClick: () => void;
 }
 
 const MicrophoneButton = ({
+  disabled,
   isMicrophoneOn,
   onClick,
 }: MicrophoneButtonProps) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline" type="button" onClick={onClick}>
+        <Button
+          disabled={disabled}
+          variant="outline"
+          type="button"
+          onClick={onClick}
+        >
           {isMicrophoneOn ? <Mic /> : <MicOff />}
         </Button>
       </TooltipTrigger>

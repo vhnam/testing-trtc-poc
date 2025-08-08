@@ -18,7 +18,10 @@ interface UseRemoteUsersReturn {
     userId: string;
     streamType: TRTCStreamType;
   }) => void;
-  setupEventListeners: (onRemoteUserExit?: () => void, onDoctorEndCall?: () => void) => void;
+  setupEventListeners: (
+    onRemoteUserExit?: () => void,
+    onDoctorEndCall?: () => void
+  ) => void;
   cleanupEventListeners: () => void;
   checkExistingRemoteUsers: () => void;
 }
@@ -30,7 +33,9 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
   const maxRetries = 10;
   const startingRemoteVideoRef = useRef<Set<string>>(new Set()); // Track which users are having video started
   const hasSetupEventListenersRef = useRef(false); // Prevent multiple event listener setups
-  const remoteUserExitListenerRef = useRef<((event: { userId: string }) => Promise<void>) | null>(null); // Store reference to the event listener
+  const remoteUserExitListenerRef = useRef<
+    ((event: { userId: string }) => Promise<void>) | null
+  >(null); // Store reference to the event listener
 
   // Note: userId is available from the store but not used in this hook
   // Keeping the import for potential future use
@@ -146,6 +151,9 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
             userId,
             streamType,
             view: REMOTE_VIDEO_VIEW,
+            option: {
+              fillMode: 'cover',
+            },
           });
           console.log('Successfully started remote video for user:', userId);
         } catch (error) {
@@ -154,9 +162,14 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
           if (errorMessage.includes('already started')) {
             console.log(`Remote video already started for user: ${userId}`);
           } else if (errorMessage.includes('abort')) {
-            console.log(`Remote video start aborted for user: ${userId} - user may have left`);
+            console.log(
+              `Remote video start aborted for user: ${userId} - user may have left`
+            );
           } else {
-            console.error(`Failed to start remote video for user ${userId}:`, error);
+            console.error(
+              `Failed to start remote video for user ${userId}:`,
+              error
+            );
           }
         }
       } catch (error) {
@@ -200,14 +213,14 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
       // Create the remote user exit listener function and store its reference
       const remoteUserExitListener = async (event: { userId: string }) => {
         await handleRemoteUserExit(event);
-        
+
         // Call the doctor end call callback if provided (for patient to show toast when doctor leaves)
         if (onDoctorEndCall) {
           setTimeout(() => {
             onDoctorEndCall();
           }, 100);
         }
-        
+
         // Call the general remote user exit callback if provided (for patient to end call when doctor leaves)
         if (onRemoteUserExit) {
           setTimeout(() => {
@@ -248,13 +261,13 @@ export const useRemoteUsers = (): UseRemoteUsersReturn => {
     console.log('Cleaning up remote user event listeners...');
 
     trtc.off(TRTC.EVENT.REMOTE_USER_ENTER, handleRemoteUserEnter);
-    
+
     // Use the stored reference to remove the event listener
     if (remoteUserExitListenerRef.current) {
       trtc.off(TRTC.EVENT.REMOTE_USER_EXIT, remoteUserExitListenerRef.current);
       remoteUserExitListenerRef.current = null;
     }
-    
+
     trtc.off(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, handleRemoteVideoAvailable);
     trtc.off(TRTC.EVENT.REMOTE_AUDIO_AVAILABLE, () => {});
   }, [handleRemoteUserEnter, handleRemoteVideoAvailable]);
