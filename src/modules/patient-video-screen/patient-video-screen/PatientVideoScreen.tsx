@@ -3,7 +3,7 @@ import { useStore } from 'zustand';
 
 import userInfoStore from '@/stores/userInfo.store';
 
-import PatientVideoContainer from '../patient-video-container';
+import PatientVideoContainer from '@/modules/patient-video-screen/patient-video-container';
 
 const PatientVideoScreen = () => {
   const {

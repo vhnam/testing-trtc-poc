@@ -1,1 +1,1 @@
-export { default } from './DoctorVideoScreen';
+export { default } from './PatientVideoScreen';

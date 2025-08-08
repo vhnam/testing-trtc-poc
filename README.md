@@ -45,7 +45,6 @@ src/
 │   ├── PatientVideoLayout/ # Patient-specific video layout
 │   ├── TakeScreenshotButton/ # Screenshot functionality
 │   ├── VideoButton/    # Video controls
-│   ├── VideoLayout/    # Generic video layout
 │   └── ui/            # shadcn/ui components
 ├── constants/         # Application constants
 ├── hooks/            # Custom React hooks
@@ -67,17 +66,16 @@ src/
 ├── stores/          # Zustand state management
 ├── styles/          # Global styles
 └── utils/           # Utility functions
-    ├── generateTestUserSig.ts # User signature generation
     ├── trtc.ts              # TRTC instance management
     ├── screenshot.ts        # Screenshot functionality
-    └── string.ts           # String utilities
+    └── ui.ts               # UI utilities
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (recommended: Node.js 20+)
+- Node.js 20+ (required)
 - npm, yarn, or pnpm
 - Tencent TRTC SDK credentials
 
@@ -87,7 +85,7 @@ src/
 
 ```bash
 git clone <repository-url>
-cd testing-trtc
+cd testing-trpc-poc
 ```
 
 2. Install dependencies:
@@ -201,21 +199,6 @@ Custom webpack configuration handles browser-specific modules and fallbacks for 
 - **Prettier v3.6.2** - Code formatting
 - **Husky** - Git hooks
 - **lint-staged** - Pre-commit checks
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
-
-1. Push your code to GitHub
-2. Import your project to Vercel
-3. Add environment variables
-4. Deploy
-
-### Other Platforms
-
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
 
 ## 🔒 Security Considerations
 
