@@ -30,4 +30,4 @@ const PatientVideoLayout = ({ remoteUsers }: PatientVideoLayoutProps) => {
   );
 };
 
-export default PatientVideoLayout; 
+export default PatientVideoLayout;

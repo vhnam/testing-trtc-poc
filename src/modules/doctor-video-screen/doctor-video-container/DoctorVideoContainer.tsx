@@ -23,7 +23,15 @@ import VideoButton from '@/components/VideoButton';
 
 import DoctorInvitationDialogContainer from '@/modules/doctor-video-screen/doctor-invitation-dialog-container';
 
-const DoctorVideoContainer = () => {
+interface DoctorVideoContainerProps {
+  sdkAppId: number;
+  userSig: string;
+}
+
+const DoctorVideoContainer = ({
+  sdkAppId,
+  userSig,
+}: DoctorVideoContainerProps) => {
   const router = useRouter();
   const hasSetupEventListenersRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +49,12 @@ const DoctorVideoContainer = () => {
     joinRoom,
     isVideoStarted,
     isAudioStarted,
-  } = useTRTCRoom(); // No auto-join in hook anymore, doctor joins manually
+  } = useTRTCRoom({
+    autoJoin: false,
+    showVirtualBackground: true,
+    sdkAppId,
+    userSig,
+  });
 
   const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
     useMediaControls({ isVideoStarted });
@@ -67,7 +80,12 @@ const DoctorVideoContainer = () => {
       if (!userId) return;
 
       console.log('Starting call as doctor with room ID:', data.patientId);
-      await joinRoom(data.patientId);
+
+      try {
+        await joinRoom(data.patientId);
+      } catch (error) {
+        console.error('Failed to join room:', error);
+      }
     },
     [userId, joinRoom]
   );

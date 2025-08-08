@@ -1,8 +1,8 @@
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 
-const DoctorVideoContainer = dynamic(
-  () => import('@/modules/doctor-video-screen/doctor-video-container'),
+const DoctorVideoScreen = dynamic(
+  () => import('@/modules/doctor-video-screen/doctor-video-screen'),
   {
     ssr: false,
   }
@@ -14,7 +14,7 @@ const DoctorPage = () => {
       <Head>
         <title>Doctor</title>
       </Head>
-      <DoctorVideoContainer />
+      <DoctorVideoScreen />
     </>
   );
 };

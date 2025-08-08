@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import TRTC, { type NetworkQuality } from 'trtc-sdk-v5';
+
 import { getTRTCInstance } from '@/utils/trtc';
 
 const trtc = getTRTCInstance();
@@ -50,4 +51,4 @@ export const useNetworkQuality = (): UseNetworkQualityReturn => {
     setupNetworkQualityListener,
     cleanupNetworkQualityListener,
   };
-}; 
+};

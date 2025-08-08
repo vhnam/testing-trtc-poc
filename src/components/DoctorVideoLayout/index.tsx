@@ -1,1 +1,1 @@
-export { default } from './DoctorVideoLayout'; 
+export { default } from './DoctorVideoLayout';

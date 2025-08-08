@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import LibGenerateTestUserSig from '@/libs/lib-generate-test-usersig-es.min.js';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 /**
  * Expiration time for the signature, it is recommended not to set it too short.
@@ -8,10 +8,7 @@ import LibGenerateTestUserSig from '@/libs/lib-generate-test-usersig-es.min.js';
  */
 const EXPIRED_TIME = 60 * 60 * 24 * 7;
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -35,7 +32,7 @@ export default function handler(
       secretKey,
       EXPIRED_TIME
     );
-    
+
     const userSig = generator.genTestUserSig(userId);
 
     return res.status(200).json({
@@ -46,4 +43,4 @@ export default function handler(
     console.error('Error generating user signature:', error);
     return res.status(500).json({ error: 'Failed to generate user signature' });
   }
-} 
+}

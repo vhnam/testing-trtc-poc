@@ -15,7 +15,15 @@ import {
 } from '@/components';
 import { Button } from '@/components/ui/button';
 
-const PatientVideoContainer = () => {
+interface PatientVideoContainerProps {
+  sdkAppId: number;
+  userSig: string;
+}
+
+const PatientVideoContainer = ({
+  sdkAppId,
+  userSig,
+}: PatientVideoContainerProps) => {
   const router = useRouter();
   const hasSetupEventListenersRef = useRef(false);
 
@@ -33,7 +41,12 @@ const PatientVideoContainer = () => {
     isAudioStarted,
     isVideoStarted,
     startLocalMedia,
-  } = useTRTCRoom();
+  } = useTRTCRoom({
+    autoJoin: false,
+    showVirtualBackground: false,
+    sdkAppId,
+    userSig,
+  });
 
   const { isVideoOn, isMicrophoneOn, toggleMicrophone, toggleVideo } =
     useMediaControls({ isVideoStarted });
@@ -94,9 +107,13 @@ const PatientVideoContainer = () => {
       );
 
       // Start local media
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log('Patient starting local media');
-        startLocalMedia();
+        try {
+          await startLocalMedia();
+        } catch (error) {
+          console.error('Failed to start local media:', error);
+        }
       }, 1000);
 
       // Check for existing remote users
@@ -104,7 +121,13 @@ const PatientVideoContainer = () => {
         checkExistingRemoteUsers();
       }, 3000); // Increased delay to avoid timing issues
     }
-  }, [currentRoomId, isJoining, checkExistingRemoteUsers, startLocalMedia]);
+  }, [
+    currentRoomId,
+    isJoining,
+    checkExistingRemoteUsers,
+    startLocalMedia,
+    userId,
+  ]);
 
   // Show loading state
   if (isJoining) {
@@ -140,7 +163,13 @@ const PatientVideoContainer = () => {
             <p className="text-gray-600 mb-8">Click below to join the room</p>
             <Button
               type="button"
-              onClick={() => joinRoom(userId)}
+              onClick={async () => {
+                try {
+                  await joinRoom(userId);
+                } catch (error) {
+                  console.error('Failed to join room:', error);
+                }
+              }}
               variant="outline"
             >
               Join Room

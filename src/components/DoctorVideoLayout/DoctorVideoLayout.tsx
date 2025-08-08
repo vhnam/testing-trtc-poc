@@ -1,4 +1,5 @@
 import { LOCAL_VIDEO_VIEW, REMOTE_VIDEO_VIEW } from '@/constants/room';
+
 import { cn } from '@/utils/ui';
 
 interface DoctorVideoLayoutProps {
@@ -6,7 +7,10 @@ interface DoctorVideoLayoutProps {
   isConfigPanelOpen?: boolean;
 }
 
-const DoctorVideoLayout = ({ remoteUsers, isConfigPanelOpen = false }: DoctorVideoLayoutProps) => {
+const DoctorVideoLayout = ({
+  remoteUsers,
+  isConfigPanelOpen = false,
+}: DoctorVideoLayoutProps) => {
   return (
     <div className="w-full h-full bg-gray-200 rounded-t-lg overflow-hidden relative">
       {remoteUsers.length === 0 && (
@@ -36,4 +40,4 @@ const DoctorVideoLayout = ({ remoteUsers, isConfigPanelOpen = false }: DoctorVid
   );
 };
 
-export default DoctorVideoLayout; 
+export default DoctorVideoLayout;

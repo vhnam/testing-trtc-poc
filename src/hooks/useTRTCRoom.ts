@@ -20,7 +20,19 @@ interface UseTRTCRoomReturn {
   startLocalMedia: () => Promise<void>;
 }
 
-export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
+interface useTRTCRoomProps {
+  autoJoin: boolean;
+  showVirtualBackground: boolean;
+  sdkAppId: number;
+  userSig: string;
+}
+
+export const useTRTCRoom = ({
+  autoJoin = false,
+  showVirtualBackground = false,
+  sdkAppId,
+  userSig,
+}: useTRTCRoomProps): UseTRTCRoomReturn => {
   const [currentRoomId, setCurrentRoomId] = useState<number | string | null>(
     null
   );
@@ -89,23 +101,6 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
     }
   }, []);
 
-  // Helper function to generate user signature
-  const generateUserSignature = useCallback(async (userId: string) => {
-    const response = await fetch('/api/generate-user-sig', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate user signature');
-    }
-
-    return await response.json();
-  }, []);
-
   // Helper function to enter TRTC room
   const enterTRTCRoom = useCallback(
     async (
@@ -135,9 +130,19 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
         view: LOCAL_VIDEO_VIEW,
         option: {
           fillMode: 'cover',
-          profile: '720p',
+          profile: '1440p',
         },
       });
+
+      if (showVirtualBackground) {
+        await trtc.startPlugin('VirtualBackground', {
+          sdkAppId,
+          userId,
+          userSig,
+          type: 'image',
+          src: '/zoom-rmg-green.webp',
+        });
+      }
 
       setIsVideoStarted(true);
       console.log('Successfully started local video');
@@ -151,7 +156,7 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
         throw error;
       }
     }
-  }, [isVideoStarted]);
+  }, [isVideoStarted, sdkAppId, showVirtualBackground, userId, userSig]);
 
   // Helper function to start local audio
   const startLocalAudio = useCallback(async () => {
@@ -242,9 +247,6 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
         // Exit any existing room first to prevent "already start" error
         await exitExistingRoom();
 
-        // Generate user signature via API
-        const { sdkAppId, userSig } = await generateUserSignature(userId);
-
         // Enter TRTC room
         await enterTRTCRoom(roomId, userId, sdkAppId, userSig);
 
@@ -266,8 +268,9 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
     },
     [
       userId,
+      sdkAppId,
+      userSig,
       exitExistingRoom,
-      generateUserSignature,
       enterTRTCRoom,
       scheduleMediaStart,
     ]
@@ -278,11 +281,14 @@ export const useTRTCRoom = (autoJoin: boolean = true): UseTRTCRoomReturn => {
     if (!isVideoStarted) return;
 
     try {
+      if (showVirtualBackground) {
+        await trtc.stopPlugin('VirtualBackground');
+      }
       await trtc.stopLocalVideo();
     } catch (error) {
       console.log('Error stopping local video:', error);
     }
-  }, [isVideoStarted]);
+  }, [isVideoStarted, showVirtualBackground]);
 
   // Helper function to stop local audio
   const stopLocalAudio = useCallback(async () => {

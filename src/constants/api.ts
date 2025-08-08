@@ -21,10 +21,13 @@ export const buildApiUrl = (endpoint: string): string => {
 export const API_ENDPOINTS = {
   appointments: {
     list: () => buildApiUrl(API_CONFIG.ENDPOINTS.APPOINTMENTS),
-    detail: (id: string) => buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
+    detail: (id: string) =>
+      buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
     create: () => buildApiUrl(API_CONFIG.ENDPOINTS.APPOINTMENTS),
-    update: (id: string) => buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
-    delete: (id: string) => buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
+    update: (id: string) =>
+      buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
+    delete: (id: string) =>
+      buildApiUrl(`${API_CONFIG.ENDPOINTS.APPOINTMENTS}/${id}`),
   },
   users: {
     list: () => buildApiUrl(API_CONFIG.ENDPOINTS.USERS),
