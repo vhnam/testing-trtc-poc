@@ -22,13 +22,15 @@ interface UseTRTCRoomReturn {
 
 interface useTRTCRoomProps {
   autoJoin: boolean;
-  showVirtualBackground: boolean;
+  denoise?: boolean;
+  showVirtualBackground?: boolean;
   sdkAppId: number;
   userSig: string;
 }
 
 export const useTRTCRoom = ({
   autoJoin = false,
+  denoise = false,
   showVirtualBackground = false,
   sdkAppId,
   userSig,
@@ -164,6 +166,15 @@ export const useTRTCRoom = ({
 
     try {
       await trtc.startLocalAudio();
+
+      if (denoise) {
+        await trtc.startPlugin('AIDenoiser', {
+          sdkAppId,
+          userId,
+          userSig,
+        });
+      }
+
       setIsAudioStarted(true);
       console.log('Successfully started local audio');
     } catch (error) {
@@ -176,7 +187,7 @@ export const useTRTCRoom = ({
         throw error;
       }
     }
-  }, [isAudioStarted]);
+  }, [denoise, isAudioStarted, sdkAppId, userId, userSig]);
 
   const startLocalMedia = useCallback(async () => {
     // Prevent multiple simultaneous calls
@@ -295,11 +306,14 @@ export const useTRTCRoom = ({
     if (!isAudioStarted) return;
 
     try {
+      if (denoise) {
+        await trtc.stopPlugin('AIDenoiser');
+      }
       await trtc.stopLocalAudio();
     } catch (error) {
       console.log('Error stopping local audio:', error);
     }
-  }, [isAudioStarted]);
+  }, [denoise, isAudioStarted]);
 
   // Helper function to reset room state
   const resetRoomState = useCallback(() => {

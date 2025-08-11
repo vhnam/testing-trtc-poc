@@ -43,6 +43,7 @@ const PatientVideoContainer = ({
     startLocalMedia,
   } = useTRTCRoom({
     autoJoin: false,
+    denoise: true,
     showVirtualBackground: false,
     sdkAppId,
     userSig,
