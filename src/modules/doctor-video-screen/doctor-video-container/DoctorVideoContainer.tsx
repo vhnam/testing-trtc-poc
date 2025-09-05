@@ -51,7 +51,7 @@ const DoctorVideoContainer = ({
     isAudioStarted,
   } = useTRTCRoom({
     autoJoin: false,
-    showVirtualBackground: true,
+    showVirtualBackground: false,
     sdkAppId,
     userSig,
   });

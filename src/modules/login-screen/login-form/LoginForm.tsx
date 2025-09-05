@@ -1,5 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
+import { useRouter } from 'next/router';
 
 import { roles } from '@/constants/role';
 
@@ -15,6 +16,7 @@ export interface LoginFormProps {
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
+  const router = useRouter();
   const { register, handleSubmit, control } = useForm<LoginSchema>({
     defaultValues: {
       userId: '',
@@ -67,9 +69,17 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         </div>
       </div>
 
-      <div>
+      <div className="space-y-3">
         <Button className="w-full" type="submit">
           Create / Login
+        </Button>
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="w-full"
+          onClick={() => router.push('/preview')}
+        >
+          Test Camera & Microphone
         </Button>
       </div>
     </form>
