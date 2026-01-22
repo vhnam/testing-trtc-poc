@@ -1,4 +1,4 @@
-import { Mic, MicOff } from 'lucide-react';
+import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,16 +20,18 @@ const MicrophoneButton = ({
 }: MicrophoneButtonProps) => {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          disabled={disabled}
-          variant="outline"
-          type="button"
-          onClick={onClick}
-        >
-          {isMicrophoneOn ? <Mic /> : <MicOff />}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            disabled={disabled}
+            variant="outline"
+            type="button"
+            onClick={onClick}
+          >
+            {isMicrophoneOn ? <IconMicrophone /> : <IconMicrophoneOff />}
+          </Button>
+        }
+      />
       <TooltipContent>
         {isMicrophoneOn ? 'Turn off microphone' : 'Turn on microphone'}
       </TooltipContent>

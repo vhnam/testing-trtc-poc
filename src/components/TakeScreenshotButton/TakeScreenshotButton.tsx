@@ -1,4 +1,4 @@
-import { Camera } from 'lucide-react';
+import { IconCamera } from '@tabler/icons-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -37,16 +37,18 @@ const TakeScreenshotButton = () => {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          type="button"
-          onClick={handleTakeScreenshot}
-          disabled={isCapturing}
-        >
-          <Camera className={isCapturing ? 'animate-pulse' : ''} />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="outline"
+            type="button"
+            onClick={handleTakeScreenshot}
+            disabled={isCapturing}
+          >
+            <IconCamera className={isCapturing ? 'animate-pulse' : ''} />
+          </Button>
+        }
+      />
       <TooltipContent>
         {isCapturing ? 'Capturing...' : 'Take a screenshot'}
       </TooltipContent>

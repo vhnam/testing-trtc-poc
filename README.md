@@ -98,10 +98,10 @@ yarn install
    Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_DEFAULT_ROOM_ID=your_room_id
+NEXT_PUBLIC_API_URL=
 
-SDK_APP_ID=your_sdk_app_id
-SDK_SECRET_KEY=your_sdk_secret_key
+NEXT_PUBLIC_SDK_APP_ID=your_sdk_app_id
+NEXT_PUBLIC_SDK_SECRET_KEY=your_sdk_secret_key
 ```
 
 4. Run the development server:

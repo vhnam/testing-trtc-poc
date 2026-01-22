@@ -1,4 +1,4 @@
-import { Settings2 } from 'lucide-react';
+import { IconSettings } from '@tabler/icons-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,11 +14,13 @@ export interface ConfigButtonProps {
 const ConfigButton = ({ onClick }: ConfigButtonProps) => {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="outline" type="button" onClick={onClick}>
-          <Settings2 />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button variant="outline" type="button" onClick={onClick}>
+            <IconSettings />
+          </Button>
+        }
+      />
       <TooltipContent>Check audio and video</TooltipContent>
     </Tooltip>
   );

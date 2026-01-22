@@ -49,9 +49,9 @@ const DoctorInvitationDialogContainer = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button>Start Video Call</Button>
-      </DialogTrigger>
+      } />
 
       <DialogContent className="max-w-md">
         <form onSubmit={handleSubmit(handleFormSubmit)}>

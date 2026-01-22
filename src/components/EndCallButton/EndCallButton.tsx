@@ -1,4 +1,4 @@
-import { Phone } from 'lucide-react';
+import { IconPhone } from '@tabler/icons-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,11 +14,13 @@ export interface EndCallButtonProps {
 const EndCallButton = ({ onClick }: EndCallButtonProps) => {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="destructive" type="button" onClick={onClick}>
-          <Phone />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button variant="destructive" type="button" onClick={onClick}>
+            <IconPhone />
+          </Button>
+        }
+      />
       <TooltipContent>End call</TooltipContent>
     </Tooltip>
   );

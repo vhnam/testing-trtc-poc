@@ -1,8 +1,10 @@
 'use client';
 
-import { ChevronUp, Settings, User } from 'lucide-react';
+import { IconChevronUp, IconSettings, IconUser } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import TRTC, { NetworkQuality } from 'trtc-sdk-v5';
+
+import { cn } from '@/utils/ui';
 
 import NetworkStatus from '@/components/NetworkStatus';
 import { Button } from '@/components/ui/button';
@@ -32,15 +34,15 @@ const AudioVideoConfigurationPanel = ({
   isOpen,
   setIsOpen,
 }: AudioVideoConfigurationPanelProps) => {
-  const [userMicrophone, setUserMicrophone] = useState('Device Name');
-  const [userCamera, setUserCamera] = useState('Device Name');
+  const [userMicrophone, setUserMicrophone] = useState<string | null>(null);
+  const [userCamera, setUserCamera] = useState<string | null>(null);
   const [userVolume, setUserVolume] = useState(50);
   const [backgroundOn, setBackgroundOn] = useState(false);
   const [microphoneList, setMicphoneList] = useState<MediaDeviceInfo[]>([]);
   const [cameraList, setCameraList] = useState<MediaDeviceInfo[]>([]);
 
-  const handleVolumeChange = (value: number[]) => {
-    setUserVolume(value[0]);
+  const handleVolumeChange = (value: number | readonly number[]) => {
+    setUserVolume(Array.isArray(value) ? value[0] : value);
   };
 
   const handleTestAudio = () => {
@@ -75,24 +77,26 @@ const AudioVideoConfigurationPanel = ({
       onOpenChange={setIsOpen}
       className="w-full bg-white border absolute bottom-0 left-0 right-0"
     >
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className="w-full justify-between p-4 hover:bg-gray-50"
-        >
-          <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4 text-gray-600" />
-            <p className="text-md font-semibold text-gray-900">
-              Check audio and video
-            </p>
-          </div>
-          <ChevronUp
-            className={`h-4 w-4 text-gray-600 transition-transform ${
-              isOpen ? 'rotate-180' : ''
-            }`}
-          />
-        </Button>
-      </CollapsibleTrigger>
+      <CollapsibleTrigger
+        render={
+          <Button
+            variant="ghost"
+            className="w-full justify-between p-4 hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-2">
+              <IconSettings className="size-4 text-gray-600" />
+              <p className="text-md font-semibold text-gray-900">
+                Check audio and video
+              </p>
+            </div>
+            <IconChevronUp
+              className={cn('size-4 text-gray-600 transition-transform)', {
+                ['rotate-180']: isOpen,
+              })}
+            />
+          </Button>
+        }
+      />
 
       <div className="bg-white grid grid-cols-1 lg:grid-cols-2">
         <div className="flex justify-between items-center py-2 px-4">
@@ -186,7 +190,7 @@ const AudioVideoConfigurationPanel = ({
             <div className="bg-teal-600 rounded-lg p-4 h-48 flex flex-col items-center justify-center text-white">
               <div className="text-center space-y-2">
                 <h4 className="font-medium">RafflesMedical</h4>
-                <User className="h-16 w-16 mx-auto opacity-80" />
+                <IconUser className="size-16 mx-auto opacity-80" />
               </div>
             </div>
           </div>

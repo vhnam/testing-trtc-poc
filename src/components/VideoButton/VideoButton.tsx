@@ -1,4 +1,4 @@
-import { Video, VideoOff } from 'lucide-react';
+import { IconVideo, IconVideoOff } from '@tabler/icons-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,16 +20,18 @@ const VideoButton = ({
 }: VideoButtonProps) => {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          disabled={disabled}
-          variant="outline"
-          type="button"
-          onClick={onClick}
-        >
-          {isVideoOn ? <Video /> : <VideoOff />}
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            disabled={disabled}
+            variant="outline"
+            type="button"
+            onClick={onClick}
+          >
+            {isVideoOn ? <IconVideo /> : <IconVideoOff />}
+          </Button>
+        }
+      />
       <TooltipContent>
         {isVideoOn ? 'Turn off video' : 'Turn on video'}
       </TooltipContent>

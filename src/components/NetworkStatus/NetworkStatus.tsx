@@ -1,7 +1,8 @@
-import { Signal } from 'lucide-react';
+import { IconAntennaBars5 } from '@tabler/icons-react';
+import { type VariantProps } from 'class-variance-authority';
 import { NetworkQualityValue } from 'trtc-sdk-v5';
 
-import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { Badge, type badgeVariants } from '@/components/ui/badge';
 
 const status = ['Unknown', 'Good', 'Good', 'Normal', 'Poor', 'Poor', 'Offline'];
 const colors = [
@@ -12,7 +13,7 @@ const colors = [
   'destructive',
   'destructive',
   'default',
-] as BadgeVariant[];
+] as VariantProps<typeof badgeVariants>['variant'][];
 
 export interface NetworkStatusProps {
   value?: NetworkQualityValue;
@@ -20,11 +21,14 @@ export interface NetworkStatusProps {
 
 const NetworkStatus = ({ value }: NetworkStatusProps) => {
   return (
-    <Badge asChild variant={colors[value ?? 0]}>
-      <span>
-        <Signal /> {status[value ?? 0]}
-      </span>
-    </Badge>
+    <Badge
+      variant={colors[value ?? 0]}
+      render={
+        <>
+          <IconAntennaBars5 /> {status[value ?? 0]}
+        </>
+      }
+    />
   );
 };
 
