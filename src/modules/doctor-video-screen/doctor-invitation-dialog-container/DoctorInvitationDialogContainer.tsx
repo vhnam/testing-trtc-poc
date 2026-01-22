@@ -23,6 +23,9 @@ export interface DoctorInvitationDialogContainerProps {
   onAction: (data: PatientInvitationSchema) => void;
 }
 
+// Extract trigger button to prevent recreation on every render
+const triggerButton = <Button>Start Video Call</Button>;
+
 const DoctorInvitationDialogContainer = ({
   onAction,
 }: DoctorInvitationDialogContainerProps) => {
@@ -40,6 +43,8 @@ const DoctorInvitationDialogContainer = ({
     resolver: yupResolver(patientInvitationSchema),
   });
 
+  // Use watch() to subscribe to field changes for reactive disabled state
+  // This is necessary since we need the button to enable/disable as user types
   const patientId = watch('patientId');
 
   const handleFormSubmit = (data: PatientInvitationSchema) => {
@@ -49,7 +54,7 @@ const DoctorInvitationDialogContainer = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={<Button>Start Video Call</Button>} />
+      <DialogTrigger render={triggerButton} />
 
       <DialogContent className="max-w-md">
         <form onSubmit={handleSubmit(handleFormSubmit)}>

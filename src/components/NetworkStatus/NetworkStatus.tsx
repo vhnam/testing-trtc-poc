@@ -24,9 +24,9 @@ const NetworkStatus = ({ value }: NetworkStatusProps) => {
     <Badge
       variant={colors[value ?? 0]}
       render={
-        <>
+        <span>
           <IconAntennaBars5 /> {status[value ?? 0]}
-        </>
+        </span>
       }
     />
   );

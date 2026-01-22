@@ -9,7 +9,7 @@
     "dev": "next dev --turbo --experimental-https",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prepare": "husky",
     "format": "prettier --write ."
   },
@@ -53,6 +53,6 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix"
   }
 }
