@@ -1510,7 +1510,7 @@ axe-core@^4.10.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.1.tgz#052ff9b2cbf543f5595028b583e4763b40c78ea7"
   integrity sha512-BASOg+YwO2C+346x3LZOeoovTIoTrRqEsqMa6fmfAV0P+U9mFr9NsyOEpiYvFjbc64NMrSswhV50WdXzdb/Z5A==
 
-axios@^1.11.0:
+axios@^1.13.2:
   version "1.13.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.2.tgz#9ada120b7b5ab24509553ec3e40123521117f687"
   integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
@@ -4147,7 +4147,7 @@ react-dom@19.2.3:
   dependencies:
     scheduler "^0.27.0"
 
-react-hook-form@^7.61.1:
+react-hook-form@^7.71.1:
   version "7.71.1"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.71.1.tgz#6a758958861682cf0eb22131eead684ba3618f66"
   integrity sha512-9SUJKCGKo8HUSsCO+y0CtqkqI5nNuaDqTxyqPsZPqIwudpj4rCrAz/jZV+jn57bx5gtZKOh3neQu94DXMc+w5w==
@@ -4841,7 +4841,7 @@ tough-cookie@^6.0.0:
   dependencies:
     tldts "^7.0.5"
 
-trtc-sdk-v5@^5.12.0:
+trtc-sdk-v5@^5.15.0:
   version "5.15.0"
   resolved "https://registry.yarnpkg.com/trtc-sdk-v5/-/trtc-sdk-v5-5.15.0.tgz#f6b62b1c7c7e06054a373786d71d773d518d2f8e"
   integrity sha512-OineHjEHqyk6pa33/RK2QBKhMXDJnjsb6niuxXQRFtkuboAWKslnYn+nmnoJq3DpQDYjhNI4hQSeEwqG8qkhEA==
@@ -5277,7 +5277,7 @@ zod@^3.24.1:
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.5.tgz#aeb269a6f9fc259b1212c348c7c5432aaa474d2a"
   integrity sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==
 
-zustand@^5.0.7:
+zustand@^5.0.10:
   version "5.0.10"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.10.tgz#4db510c0c4c25a5f1ae43227b307ddf1641a3210"
   integrity sha512-U1AiltS1O9hSy3rul+Ub82ut2fqIAefiSuwECWt6jlMVUGejvf+5omLcRBSzqbRagSM3hQZbtzdeRc6QVScXTg==
