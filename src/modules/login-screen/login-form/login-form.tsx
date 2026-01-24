@@ -1,4 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -11,6 +12,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const SettingsConfigurationDialogTrigger = dynamic(
+  () => import('@/components/settings-configuration-dialog-trigger'),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="w-full h-8.5" />,
+  }
+);
 
 export interface LoginFormProps {
   onLogin: (data: LoginSchema) => void;
@@ -78,14 +88,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             <Button className="w-full" type="submit">
               Proceed to Consultation Room
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => router.push('/preview')}
-            >
-              Test Camera & Microphone
-            </Button>
+            <SettingsConfigurationDialogTrigger isSupportVirtualBackground />
           </div>
         </form>
       </CardContent>

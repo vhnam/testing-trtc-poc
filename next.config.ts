@@ -1,6 +1,6 @@
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
 import type { NextConfig } from 'next';
 import path from 'path';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
 
 // Function to copy directory recursively
 function copyDir(src: string, dest: string) {
@@ -25,7 +25,10 @@ function copyDir(src: string, dest: string) {
 }
 
 // Copy TRTC assets on startup (works with both webpack and Turbopack)
-const assetsSource = path.resolve(process.cwd(), 'node_modules/trtc-sdk-v5/assets');
+const assetsSource = path.resolve(
+  process.cwd(),
+  'node_modules/trtc-sdk-v5/assets'
+);
 const assetsDest = path.resolve(process.cwd(), 'public/assets/trtc-sdk');
 
 try {
