@@ -16,10 +16,7 @@ const PatientVideoLayout = ({ remoteUsers }: PatientVideoLayoutProps) => {
           </div>
         )}
 
-        <div
-          id={REMOTE_VIDEO_VIEW}
-          className="w-full h-full [&_video]:align-top"
-        />
+        <div id={REMOTE_VIDEO_VIEW} className="size-full [&_video]:align-top" />
       </div>
 
       <div
