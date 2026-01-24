@@ -42,7 +42,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 id="userId"
                 type="text"
                 required
-                placeholder="Please enter the User Id you want to proceed to consultation room"
+                placeholder="Please enter the User Id you want to proceed"
                 {...register('userId')}
               />
             </div>

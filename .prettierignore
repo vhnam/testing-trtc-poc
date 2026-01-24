@@ -6,4 +6,4 @@ libs
 tsconfig.json
 tsconfig.node.json
 
-public/assets
+public/assets/trtc-sdk

@@ -9,7 +9,7 @@ export const getTRTCInstance = () => {
     console.log('Creating new TRTC instance');
     trtcInstance = TRTC.create({
       plugins: [VirtualBackground],
-      assetsPath: '/assets',
+      assetsPath: '/assets/trtc-sdk',
     });
   }
   return trtcInstance;
