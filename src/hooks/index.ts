@@ -1,7 +1,7 @@
-export { useMediaControls } from './useMediaControls';
-export { useMediaPermissions } from './useMediaPermissions';
-export { useNetworkQuality } from './useNetworkQuality';
-export { useRemoteUsers } from './useRemoteUsers';
-export { useTRTCRoom } from './useTRTCRoom';
-export { useDoctorVideoState } from './useDoctorVideoState';
-export { usePatientVideoState } from './usePatientVideoState';
+export { useMediaControls } from './use-media-controls';
+export { useMediaPermissions } from './use-media-permissions';
+export { useNetworkQuality } from './use-network-quality';
+export { useRemoteUsers } from './use-remote-users';
+export { useTRTCRoom } from './use-trtc-room';
+export { useDoctorVideoState } from './use-doctor-video-state';
+export { usePatientVideoState } from './use-patient-video-state';

@@ -4,7 +4,7 @@ export {
   ErrorCallState,
   EmptyCallState,
   ActiveCallState,
-} from './CallStateComponents';
-export { VideoCallLayout } from './VideoCallLayout';
-export { CallControlsBar } from './CallControlsBar';
-export { DoctorVideoUI } from './DoctorVideoUI';
+} from './call-state-components';
+export { VideoCallLayout } from './video-call-layout';
+export { CallControlsBar } from './call-controls-bar';
+export { DoctorVideoUI } from './doctor-video-ui';

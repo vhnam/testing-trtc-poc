@@ -4,5 +4,5 @@ export {
   ErrorCallState,
   EmptyCallState,
   ActiveCallState,
-} from './PatientCallStateComponents';
-export { PatientVideoUI } from './PatientVideoUI';
+} from './patient-call-state-components';
+export { PatientVideoUI } from './patient-video-ui';

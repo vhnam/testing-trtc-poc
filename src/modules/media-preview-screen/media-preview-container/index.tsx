@@ -1,1 +1,1 @@
-export { default } from './MediaPreviewContainer';
+export { default } from './media-preview-container';
