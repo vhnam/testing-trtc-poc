@@ -6,13 +6,13 @@ import { Badge, type badgeVariants } from '@/components/ui/badge';
 
 const status = ['Unknown', 'Good', 'Good', 'Normal', 'Poor', 'Poor', 'Offline'];
 const colors = [
+  'ghost',
   'default',
-  'success',
-  'success',
+  'default',
   'warning',
   'destructive',
   'destructive',
-  'default',
+  'ghost',
 ] as VariantProps<typeof badgeVariants>['variant'][];
 
 export interface NetworkStatusProps {

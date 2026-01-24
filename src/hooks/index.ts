@@ -3,3 +3,5 @@ export { useMediaPermissions } from './useMediaPermissions';
 export { useNetworkQuality } from './useNetworkQuality';
 export { useRemoteUsers } from './useRemoteUsers';
 export { useTRTCRoom } from './useTRTCRoom';
+export { useDoctorVideoState } from './useDoctorVideoState';
+export { usePatientVideoState } from './usePatientVideoState';

@@ -18,15 +18,15 @@ const LoginContainer = () => {
   };
 
   return (
-    <div>
-      <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm space-y-6">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight">
-            Create / Login UserId
+          <h2 className="text-center text-2xl/9 font-bold tracking-tight">
+            Welcome
           </h2>
         </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <LoginForm onLogin={handleLogin} />
         </div>
       </div>

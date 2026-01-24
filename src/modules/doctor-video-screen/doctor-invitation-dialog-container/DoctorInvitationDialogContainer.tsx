@@ -61,17 +61,17 @@ const DoctorInvitationDialogContainer = ({
           <DialogHeader>
             <DialogTitle>Invite Patient</DialogTitle>
             <DialogDescription>
-              Enter the patient&apos;s ID to start a video call
+              Enter the patient&apos;s Id to start a video call
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 my-4">
             <div className="grid gap-2">
-              <Label htmlFor="patientId">Patient ID</Label>
+              <Label htmlFor="patientId">Patient Id</Label>
               <Input
                 {...register('patientId')}
                 id="patientId"
-                placeholder="Enter patient ID"
+                placeholder="Enter patient Id"
                 className={errors.patientId ? 'border-red-500' : ''}
               />
               {errors.patientId && (
@@ -82,7 +82,7 @@ const DoctorInvitationDialogContainer = ({
             </div>
           </div>
 
-          <DialogFooter>
+          <div className="flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -93,7 +93,7 @@ const DoctorInvitationDialogContainer = ({
             <Button type="submit" disabled={!patientId}>
               Invite
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

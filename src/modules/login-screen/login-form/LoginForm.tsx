@@ -1,12 +1,13 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'next/router';
+import { Controller, useForm } from 'react-hook-form';
 
 import { roles } from '@/constants/role';
 
 import loginSchema, { type LoginSchema } from '@/schemas/Login.schema';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,63 +27,69 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   });
 
   return (
-    <form onSubmit={handleSubmit(onLogin)} className="space-y-6">
-      <div>
-        <Label htmlFor="userId" className="block text-sm/6 font-medium">
-          User Id
-        </Label>
-        <div className="mt-2 mb-6">
-          <Input
-            id="userId"
-            type="text"
-            required
-            placeholder="Please enter the userId you want to create/login"
-            {...register('userId')}
-          />
-        </div>
+    <Card>
+      <CardContent>
+        <form onSubmit={handleSubmit(onLogin)} className="space-y-6">
+          <div>
+            <Label
+              htmlFor="userId"
+              className="block text-sm/6 font-medium mb-2"
+            >
+              User Id
+            </Label>
+            <div className="mb-4">
+              <Input
+                id="userId"
+                type="text"
+                required
+                placeholder="Please enter the User Id you want to proceed to consultation room"
+                {...register('userId')}
+              />
+            </div>
 
-        <div>
-          <Label className="block text-sm/6 font-medium">Your role</Label>
-          <div className="mt-2">
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  defaultValue={roles[0].value}
-                >
-                  {roles.map((role) => (
-                    <div
-                      key={role.value}
-                      className="flex items-center space-x-2"
-                    >
-                      <RadioGroupItem value={role.value} id={role.id} />
-                      <Label htmlFor={role.id}>{role.text}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
-            />
+            <div>
+              <Label className="block text-sm/6 font-medium mb-2">
+                Your role
+              </Label>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    defaultValue={roles[0].value}
+                  >
+                    {roles.map((role) => (
+                      <div
+                        key={role.value}
+                        className="flex items-center space-x-2"
+                      >
+                        <RadioGroupItem value={role.value} id={role.id} />
+                        <Label htmlFor={role.id}>{role.text}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                )}
+              />
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <Button className="w-full" type="submit">
-          Create / Login
-        </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="w-full"
-          onClick={() => router.push('/preview')}
-        >
-          Test Camera & Microphone
-        </Button>
-      </div>
-    </form>
+          <div className="space-y-3">
+            <Button className="w-full" type="submit">
+              Proceed to Consultation Room
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push('/preview')}
+            >
+              Test Camera & Microphone
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
