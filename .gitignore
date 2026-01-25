@@ -51,3 +51,6 @@ next-env.d.ts
 
 # TRTC SDK assets
 public/assets/trtc-sdk
+
+*storybook.log
+storybook-static
