@@ -7,6 +7,7 @@
   "requirePragma": false,
   "importOrder": [
     "^@/constants(.*)$",
+    "^@/libs(.*)$",
     "^@/utils(.*)$",
     "^@/hooks(.*)$",
     "^@/models(.*)$",

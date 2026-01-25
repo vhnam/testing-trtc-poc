@@ -16,6 +16,7 @@ A modern telemedicine video conferencing application built with Next.js and Tenc
 - **Error Handling**: Comprehensive error states and recovery mechanisms
 - **Custom Hooks**: Reusable hooks for TRTC room management, media controls, and network quality
 - **User Signature Generation**: Secure user authentication with TRTC SDK integration
+- **Redis Caching**: Intelligent userSig caching with Redis for improved performance and reduced API calls
 
 ## 🛠️ Tech Stack
 
@@ -25,6 +26,7 @@ A modern telemedicine video conferencing application built with Next.js and Tenc
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **State Management**: Zustand v5.0.10
 - **Form Handling**: React Hook Form v7.71.1 with Yup v1.6.1 validation
+- **Caching**: Redis with ioredis v5.9.2 for userSig caching and session management
 - **Icons**: @tabler/icons-react v3.36.1
 - **Code Quality**: ESLint v9, Prettier v3.6.2, Husky, lint-staged
 
@@ -114,7 +116,29 @@ SDK_SECRET_KEY=your_sdk_secret_key
 
 **Note**: `SDK_APP_ID` and `SDK_SECRET_KEY` are server-side only variables (no `NEXT_PUBLIC_` prefix) as they are used in the API route for generating user signatures.
 
-4. Run the development server:
+4. Set up Redis (for userSig caching):
+
+```bash
+# Start Redis using Docker Compose
+docker compose up -d redis
+```
+
+Add Redis configuration to your `.env.local` file:
+
+```env
+# Redis Configuration (for userSig caching)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+```
+
+5. Test Redis connection (optional):
+
+```bash
+yarn test:redis
+```
+
+6. Run the development server:
 
 ```bash
 npm run dev
@@ -162,12 +186,39 @@ Open [https://localhost:3000](https://localhost:3000) with your browser to see t
 - `npm run lint` - Run ESLint for code quality
 - `npm run format` - Format code with Prettier
 - `npm run prepare` - Install Husky git hooks
+- `npm run test:redis` - Test Redis connection and functionality
 
 ## 🔧 Configuration
 
 ### Development with HTTPS
 
 The development server runs with HTTPS enabled using `--experimental-https` flag for testing TRTC SDK features that require secure connections.
+
+### Redis Caching System
+
+The application uses Redis for intelligent userSig caching to improve performance and reduce TRTC SDK API calls:
+
+- **Cache Key**: `userSig:{userId}` - Each user's signature is stored with their unique ID
+- **Expiration**: 30 minutes - Cached signatures expire automatically for security
+- **Fallback**: If Redis is unavailable, the system gracefully falls back to direct generation
+- **Performance**: Repeated requests for the same user return cached signatures instantly
+
+#### How it works:
+
+1. **First Request**: Generate userSig using TRTC SDK → Store in Redis with 30-minute expiration
+2. **Subsequent Requests**: Return cached userSig if available and not expired
+3. **Cache Miss**: Generate new userSig and update cache when expired or not found
+4. **Error Handling**: Continue operation even if Redis is unavailable
+
+#### API Response:
+
+```json
+{
+  "sdkAppId": 20024876,
+  "userSig": "generated_or_cached_signature",
+  "cached": true // Indicates if response was served from cache
+}
+```
 
 ### Code Quality
 
@@ -190,6 +241,7 @@ The development server runs with HTTPS enabled using `--experimental-https` flag
 - **@hookform/resolvers v5.2.1** - Form validation resolvers
 - **@tanstack/react-query v5.84.1** - Data fetching and caching
 - **Axios v1.13.2** - HTTP client
+- **ioredis v5.9.2** - Redis client for caching and session management
 - **dayjs v1.11.13** - Date manipulation library
 - **@fontsource-variable/figtree v5.2.10** - Variable font for typography
 

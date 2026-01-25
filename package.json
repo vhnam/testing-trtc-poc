@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "prepare": "husky",
     "format": "prettier --write .",
-    "init:trtc": "tsx scripts/setup-trtc-sdk.ts"
+    "init:trtc": "tsx scripts/setup-trtc-sdk.ts",
+    "test:redis": "tsx scripts/test-redis.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -24,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "ioredis": "^5.9.2",
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
