@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import TRTC from 'trtc-sdk-v5';
+import { useCallback, useState } from 'react';
 
 interface NetworkStats {
   bandwidth: string;
@@ -31,26 +30,31 @@ export const useSettingsConfiguration = () => {
   });
   const [isLoadingNetworkStats, setIsLoadingNetworkStats] = useState(false);
 
-  // Initialize device lists
-  useEffect(() => {
-    const initializeDevices = async () => {
-      try {
-        const [microphones, cameras, speakers] = await Promise.all([
-          TRTC.getMicrophoneList(),
-          TRTC.getCameraList(),
-          TRTC.getSpeakerList(),
-        ]);
+  // Track if initialization has been triggered
+  const [isInitialized, setIsInitialized] = useState(false);
 
-        setMicrophoneList(microphones);
-        setCameraList(cameras);
-        setSpeakerList(speakers);
-      } catch (error) {
-        console.error('Failed to initialize devices:', error);
-      }
-    };
+  // Initialize device lists (lazy initialization)
+  const initializeDevices = useCallback(async () => {
+    if (isInitialized) return;
 
-    initializeDevices();
-  }, []);
+    try {
+      // Dynamically import TRTC SDK only when needed
+      const TRTC = (await import('trtc-sdk-v5')).default;
+
+      const [microphones, cameras, speakers] = await Promise.all([
+        TRTC.getMicrophoneList(),
+        TRTC.getCameraList(),
+        TRTC.getSpeakerList(),
+      ]);
+
+      setMicrophoneList(microphones);
+      setCameraList(cameras);
+      setSpeakerList(speakers);
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Failed to initialize devices:', error);
+    }
+  }, [isInitialized]);
 
   // Audio test handler
   const handleTestAudio = useCallback(() => {
@@ -387,11 +391,6 @@ export const useSettingsConfiguration = () => {
     }
   }, [measureLatency, measureBandwidth]);
 
-  // Initial network measurement on component mount
-  useEffect(() => {
-    measureNetworkQuality();
-  }, [measureNetworkQuality]);
-
   return {
     // Device lists
     microphoneList,
@@ -414,5 +413,9 @@ export const useSettingsConfiguration = () => {
     networkStats,
     isLoadingNetworkStats,
     measureNetworkQuality,
+
+    // Initialization
+    initializeDevices,
+    isInitialized,
   };
 };

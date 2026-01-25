@@ -1,5 +1,6 @@
-import { useGenerateUserSignature } from '@/queries/video-provider/video-provider.query';
 import { useStore } from 'zustand';
+
+import { useGenerateUserSignature } from '@/queries/video-provider/video-provider.query';
 
 import userInfoStore from '@/stores/user-info.store';
 

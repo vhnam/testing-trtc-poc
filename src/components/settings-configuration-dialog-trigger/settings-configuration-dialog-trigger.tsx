@@ -5,6 +5,7 @@ import {
   IconVolume,
   IconVolumeOff,
 } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +35,8 @@ interface SettingsConfigurationDialogTriggerProps {
 const SettingsConfigurationDialogTrigger = ({
   isSupportVirtualBackground = false,
 }: SettingsConfigurationDialogTriggerProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const {
     // Device lists
     microphoneList,
@@ -56,10 +59,21 @@ const SettingsConfigurationDialogTrigger = ({
     networkStats,
     isLoadingNetworkStats,
     measureNetworkQuality,
+
+    // Initialization
+    initializeDevices,
   } = useSettingsConfiguration();
 
+  // Initialize when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      initializeDevices();
+      measureNetworkQuality();
+    }
+  }, [isOpen, initializeDevices, measureNetworkQuality]);
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger
         render={
           <Button type="button" variant="outline" className="w-full">

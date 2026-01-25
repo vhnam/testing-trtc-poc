@@ -1,28 +1,51 @@
 import TRTC from 'trtc-sdk-v5';
 import VirtualBackground from 'trtc-sdk-v5/plugins/video-effect/virtual-background';
 
-// Create a single TRTC instance to be shared across the application
-let trtcInstance: ReturnType<typeof TRTC.create> | null = null;
+// Create TRTC instances to be shared across the application
+// Store instances separately based on whether virtual background plugin is included
+let trtcInstanceWithPlugin: ReturnType<typeof TRTC.create> | null = null;
+let trtcInstanceWithoutPlugin: ReturnType<typeof TRTC.create> | null = null;
 
-export const getTRTCInstance = () => {
-  if (!trtcInstance) {
-    console.log('Creating new TRTC instance');
-    trtcInstance = TRTC.create({
-      plugins: [VirtualBackground],
-      assetsPath: '/assets/trtc-sdk',
-    });
+export const getTRTCInstance = (includeVirtualBackground = false) => {
+  if (includeVirtualBackground) {
+    if (!trtcInstanceWithPlugin) {
+      console.log('Creating new TRTC instance with VirtualBackground plugin');
+      trtcInstanceWithPlugin = TRTC.create({
+        plugins: [VirtualBackground],
+        assetsPath: '/assets/trtc-sdk',
+      });
+    }
+    return trtcInstanceWithPlugin;
+  } else {
+    if (!trtcInstanceWithoutPlugin) {
+      console.log(
+        'Creating new TRTC instance without VirtualBackground plugin'
+      );
+      trtcInstanceWithoutPlugin = TRTC.create({
+        assetsPath: '/assets/trtc-sdk',
+      });
+    }
+    return trtcInstanceWithoutPlugin;
   }
-  return trtcInstance;
 };
 
 export const destroyTRTCInstance = () => {
-  if (trtcInstance) {
-    console.log('Destroying TRTC instance');
+  if (trtcInstanceWithPlugin) {
+    console.log('Destroying TRTC instance with plugin');
     try {
-      trtcInstance.exitRoom();
+      trtcInstanceWithPlugin.exitRoom();
     } catch (error) {
       console.log('Error during TRTC cleanup:', error);
     }
-    trtcInstance = null;
+    trtcInstanceWithPlugin = null;
+  }
+  if (trtcInstanceWithoutPlugin) {
+    console.log('Destroying TRTC instance without plugin');
+    try {
+      trtcInstanceWithoutPlugin.exitRoom();
+    } catch (error) {
+      console.log('Error during TRTC cleanup:', error);
+    }
+    trtcInstanceWithoutPlugin = null;
   }
 };

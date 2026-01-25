@@ -13,6 +13,7 @@
     "^@/models(.*)$",
     "^@/schemas(.*)$",
     "^@/typings(.*)$",
+    "@/queries(.*)$",
     "^@/stores(.*)$",
     "^@/components(.*)$",
     "^@/modules(.*)$",

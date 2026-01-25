@@ -1,6 +1,5 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 import { Controller, useForm } from 'react-hook-form';
 
 import { roles } from '@/constants/role';
@@ -27,7 +26,6 @@ export interface LoginFormProps {
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const router = useRouter();
   const { register, handleSubmit, control } = useForm<LoginSchema>({
     defaultValues: {
       userId: '',

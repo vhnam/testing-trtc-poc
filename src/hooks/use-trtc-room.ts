@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
 import { LOCAL_VIDEO_VIEW, REMOTE_VIDEO_VIEW } from '@/constants/room';
@@ -6,8 +6,6 @@ import { LOCAL_VIDEO_VIEW, REMOTE_VIDEO_VIEW } from '@/constants/room';
 import { getTRTCInstance } from '@/utils/trtc';
 
 import userInfoStore from '@/stores/user-info.store';
-
-const trtc = getTRTCInstance();
 
 interface UseTRTCRoomReturn {
   currentRoomId: number | string | null;
@@ -35,6 +33,13 @@ export const useTRTCRoom = ({
   sdkAppId,
   userSig,
 }: useTRTCRoomProps): UseTRTCRoomReturn => {
+  // Get TRTC instance with or without virtual background plugin based on the option
+  // Use useMemo to ensure stable reference unless showVirtualBackground changes
+  const trtc = useMemo(
+    () => getTRTCInstance(showVirtualBackground),
+    [showVirtualBackground]
+  );
+
   const [currentRoomId, setCurrentRoomId] = useState<number | string | null>(
     null
   );
@@ -101,7 +106,7 @@ export const useTRTCRoom = ({
       // Ignore errors when exiting room that doesn't exist
       console.log('No existing room to exit or error during exit:', error);
     }
-  }, []);
+  }, [trtc]);
 
   // Helper function to enter TRTC room
   const enterTRTCRoom = useCallback(
@@ -120,7 +125,7 @@ export const useTRTCRoom = ({
       });
       console.log('Successfully entered room');
     },
-    []
+    [trtc]
   );
 
   // Helper function to start local video
@@ -158,7 +163,7 @@ export const useTRTCRoom = ({
         throw error;
       }
     }
-  }, [isVideoStarted, sdkAppId, showVirtualBackground, userId, userSig]);
+  }, [isVideoStarted, sdkAppId, showVirtualBackground, userId, userSig, trtc]);
 
   // Helper function to start local audio
   const startLocalAudio = useCallback(async () => {
@@ -187,7 +192,7 @@ export const useTRTCRoom = ({
         throw error;
       }
     }
-  }, [denoise, isAudioStarted, sdkAppId, userId, userSig]);
+  }, [denoise, isAudioStarted, sdkAppId, userId, userSig, trtc]);
 
   const startLocalMedia = useCallback(async () => {
     // Prevent multiple simultaneous calls
@@ -299,7 +304,7 @@ export const useTRTCRoom = ({
     } catch (error) {
       console.log('Error stopping local video:', error);
     }
-  }, [isVideoStarted, showVirtualBackground]);
+  }, [isVideoStarted, showVirtualBackground, trtc]);
 
   // Helper function to stop local audio
   const stopLocalAudio = useCallback(async () => {
@@ -313,7 +318,7 @@ export const useTRTCRoom = ({
     } catch (error) {
       console.log('Error stopping local audio:', error);
     }
-  }, [denoise, isAudioStarted]);
+  }, [denoise, isAudioStarted, trtc]);
 
   // Helper function to reset room state
   const resetRoomState = useCallback(() => {
@@ -348,7 +353,13 @@ export const useTRTCRoom = ({
     } catch (error) {
       console.error('Failed to exit room:', error);
     }
-  }, [stopLocalVideo, stopLocalAudio, resetRoomState, clearVideoStartTimeout]);
+  }, [
+    stopLocalVideo,
+    stopLocalAudio,
+    resetRoomState,
+    clearVideoStartTimeout,
+    trtc,
+  ]);
 
   // Helper function for cleanup on unmount
   const cleanupOnUnmount = useCallback(() => {
@@ -366,7 +377,7 @@ export const useTRTCRoom = ({
     setCurrentRoomId(null);
     retryCountRef.current = 0;
     isStartingMediaRef.current = false;
-  }, []);
+  }, [trtc]);
 
   useEffect(() => {
     if (
