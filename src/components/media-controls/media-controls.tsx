@@ -10,6 +10,7 @@ interface MediaControlsProps {
   onToggleMicrophone: () => void;
   onToggleVideo: () => void;
   onEndCall: () => void;
+  isEndingCall?: boolean;
 }
 
 const MediaControls = ({
@@ -20,21 +21,22 @@ const MediaControls = ({
   onEndCall,
   onToggleMicrophone,
   onToggleVideo,
+  isEndingCall = false,
 }: MediaControlsProps) => {
   return (
     <div className="bg-white p-4">
       <div className="flex justify-center gap-4">
         <MicrophoneButton
-          disabled={!isAudioStarted}
+          disabled={!isAudioStarted || isEndingCall}
           isMicrophoneOn={isMicrophoneOn}
           onClick={onToggleMicrophone}
         />
         <VideoButton
-          disabled={!isVideoStarted}
+          disabled={!isVideoStarted || isEndingCall}
           isVideoOn={isVideoOn}
           onClick={onToggleVideo}
         />
-        <EndCallButton onClick={onEndCall} />
+        <EndCallButton onClick={onEndCall} disabled={isEndingCall} />
       </div>
     </div>
   );

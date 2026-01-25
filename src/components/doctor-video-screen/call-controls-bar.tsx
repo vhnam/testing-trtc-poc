@@ -36,7 +36,10 @@ export const CallControlsBar = ({
               />
               <TakeScreenshotButton />
             </div>
-            <EndCallButton onClick={state.handleEndCall} />
+            <EndCallButton
+              onClick={state.handleEndCall}
+              disabled={state.isEndingCall}
+            />
           </div>
         )}
       </div>

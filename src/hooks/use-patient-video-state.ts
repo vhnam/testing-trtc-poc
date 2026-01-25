@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useStore } from 'zustand';
 
@@ -22,6 +22,9 @@ export interface PatientVideoState {
   // Remote state
   remoteUsers: string[];
 
+  // Loading state
+  isEndingCall: boolean;
+
   // Actions
   handleJoinRoom: () => Promise<void>;
   handleEndCall: () => Promise<void>;
@@ -40,6 +43,7 @@ export const usePatientVideoState = ({
 }: UsePatientVideoStateProps): PatientVideoState => {
   const router = useRouter();
   const hasSetupEventListenersRef = useRef(false);
+  const [isEndingCall, setIsEndingCall] = useState(false);
 
   const {
     userInfo: { userId },
@@ -77,9 +81,18 @@ export const usePatientVideoState = ({
 
   // Handle end call
   const handleEndCall = useCallback(async () => {
-    await exitRoom();
-    router.push('/');
-  }, [exitRoom, router]);
+    // Prevent multiple clicks
+    if (isEndingCall) return;
+
+    setIsEndingCall(true);
+    try {
+      await exitRoom();
+      router.push('/');
+    } catch (error) {
+      console.error('Error ending call:', error);
+      setIsEndingCall(false);
+    }
+  }, [exitRoom, router, isEndingCall]);
 
   // Handle doctor end call - show toast and then end call
   const handleDoctorEndCall = useCallback(async () => {
@@ -171,6 +184,9 @@ export const usePatientVideoState = ({
 
     // Remote state
     remoteUsers,
+
+    // Loading state
+    isEndingCall,
 
     // Actions
     handleJoinRoom,

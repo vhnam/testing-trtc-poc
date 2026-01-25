@@ -53,6 +53,7 @@ export const ActiveCallState = ({ state }: CallStateComponentProps) => {
         onToggleMicrophone={state.toggleMicrophone}
         onToggleVideo={state.toggleVideo}
         onEndCall={state.handleEndCall}
+        isEndingCall={state.isEndingCall}
       />
     </div>
   );

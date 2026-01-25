@@ -9,19 +9,27 @@ import {
 
 export interface EndCallButtonProps {
   onClick: () => void;
+  disabled?: boolean;
 }
 
-const EndCallButton = ({ onClick }: EndCallButtonProps) => {
+const EndCallButton = ({ onClick, disabled = false }: EndCallButtonProps) => {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button variant="destructive" type="button" onClick={onClick}>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onClick}
+            disabled={disabled}
+          >
             <IconPhone />
           </Button>
         }
       />
-      <TooltipContent>End call</TooltipContent>
+      <TooltipContent>
+        {disabled ? 'Ending call...' : 'End call'}
+      </TooltipContent>
     </Tooltip>
   );
 };

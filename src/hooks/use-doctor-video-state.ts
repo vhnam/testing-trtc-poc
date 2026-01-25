@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { type NetworkQuality } from 'trtc-sdk-v5';
 import { useStore } from 'zustand';
 
@@ -28,6 +28,9 @@ export interface DoctorVideoState {
   remoteUsers: string[];
   networkQuality?: NetworkQuality;
 
+  // Loading state
+  isEndingCall: boolean;
+
   // Actions
   handleStartCall: (data: { patientId: string }) => Promise<void>;
   handleEndCall: () => Promise<void>;
@@ -46,6 +49,7 @@ export const useDoctorVideoState = ({
 }: UseDoctorVideoStateProps): DoctorVideoState => {
   const router = useRouter();
   const hasSetupEventListenersRef = useRef(false);
+  const [isEndingCall, setIsEndingCall] = useState(false);
 
   const {
     userInfo: { userId },
@@ -84,9 +88,18 @@ export const useDoctorVideoState = ({
 
   // Handle end call
   const handleEndCall = useCallback(async () => {
-    await exitRoom();
-    router.push('/');
-  }, [exitRoom, router]);
+    // Prevent multiple clicks
+    if (isEndingCall) return;
+
+    setIsEndingCall(true);
+    try {
+      await exitRoom();
+      router.push('/');
+    } catch (error) {
+      console.error('Error ending call:', error);
+      setIsEndingCall(false);
+    }
+  }, [exitRoom, router, isEndingCall]);
 
   // Handle start call with patient ID
   const handleStartCall = useCallback(
@@ -143,6 +156,9 @@ export const useDoctorVideoState = ({
     // Remote state
     remoteUsers,
     networkQuality,
+
+    // Loading state
+    isEndingCall,
 
     // Actions
     handleStartCall,
